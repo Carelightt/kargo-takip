@@ -289,7 +289,7 @@ def main():
     app.add_handler(MessageHandler(filters.ChatType.PRIVATE, unknown_dm))
 
     log.info("Bot starting…")
-    app.run_polling(close_loop=False)
+    app.run_polling()
 
 if __name__ == "__main__":
     main()
