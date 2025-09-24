@@ -50,16 +50,12 @@
       </div>
     </section>
 
-        <!-- QR + Link -->
-    <section class="qr-row">
-      <img alt="Takip QR" width="120" height="120"
-           src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=<%= encodeURIComponent(baseUrl + '/t/' + item.id) %>">
-      <div class="qr-meta">
-        <div class="label">Bu sayfanın linki</div>
-        <div class="val small"><%= baseUrl %>/t/<%= item.id %></div>
-        <div class="tips">QR’ı okut ya da 🔗 ile kopyala.</div>
-      </div>
-    </section>
+      <!-- QR -->
+<section class="qr-row">
+  <img alt="Takip QR" width="120" height="120"
+       src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=<%= encodeURIComponent(baseUrl + '/t/' + item.id) %>">
+</section>
+
 
     <!-- SSL rozetleri (QR altında) -->
     <div class="ssl-row">
