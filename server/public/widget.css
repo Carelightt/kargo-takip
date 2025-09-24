@@ -115,36 +115,52 @@ html, body, .card, .badge, .timeline .line, .timeline .dot .dot-inner {
 .btn.primary:hover{ filter: brightness(1.06); }
 .btn.primary:active{ transform: translateY(1px); }
 
-/* Mobilde de hizalar korunsun */
+/* ===================== MOBİL DOKUNUŞLAR ===================== */
+@media (max-width: 640px){
+  body { padding: 12px; }
+
+  .card { padding: 16px; border-radius: 14px; }
+
+  .top { flex-wrap: wrap; gap: 10px; }
+  .head-left { flex-wrap: wrap; gap: 8px; }
+  .trk-id { font-size: 11px; padding: 5px 8px; }
+
+  .carrier-logo { width: 96px; height: 56px; padding: 4px; }
+
+  .grid { grid-template-columns: 1fr; gap: 12px; margin: 12px 0 4px; }
+  .label { font-size: 11.5px; }
+  .val { font-size: 13.5px; }
+
+  .timeline { padding: 14px; }
+  .timeline .line { margin: 16px 8px 8px; height: 5px; }
+  .timeline .dot .dot-inner { width: 26px; height: 26px; font-size: 11px; }
+  .timeline .dot .dot-label { font-size: 11px; }
+
+  .qr-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .qr-row img { width: 160px; height: auto; }
+  .ssl-row { flex-wrap: wrap; gap: 6px; }
+  .ssl-row .ssl-badge { font-size: 10.5px; padding: 3px 6px; }
+
+  .card-footer{
+    grid-template-columns: 1fr;
+    row-gap: 10px;
+  }
+  .foot-center{ grid-column: 1; justify-self: center; font-size: 11.5px; }
+  .foot-right { grid-column: 1; justify-self: stretch; }
+  .btn.primary{ width: 100%; text-align: center; }
+
+  .card::after{ opacity: .06; background-size: 160px; }
+}
+
+/* Daha dar cihazlar (iPhone SE vs) */
+@media (max-width: 380px){
+  .carrier-logo { width: 84px; height: 50px; }
+  .head-left { gap: 6px; }
+  .val { font-size: 13px; }
+  .timeline .dot .dot-inner { width: 24px; height: 24px; font-size: 10.5px; }
+}
+
+/* Küçük breakpoint için ekstra (senin istediklerin) */
 @media (max-width: 420px){
   .foot-center{ font-size: 11px; }
-
-/* SSL rozetleri (footer içinde kullanırsan da uyumlu) */
-.ssl-badge{
-  font-size:12px;
-  color: var(--muted);
-  background: color-mix(in srgb, var(--card), transparent 15%);
-  border:1px solid color-mix(in srgb, var(--border), transparent 20%);
-  padding:4px 8px;
-  border-radius: 999px;
-}
-
-/* Kurumsal birincil buton */
-.btn.primary{
-  background: linear-gradient(135deg, #3867ff, #6b4bff);
-  color:#fff;
-  border: none;
-  padding:10px 14px;
-  border-radius:10px;
-  cursor:pointer;
-  box-shadow: 0 6px 18px rgba(56,103,255,.35);
-}
-.btn.primary:hover{ filter: brightness(1.08); }
-.btn.primary:active{ transform: translateY(1px); }
-
-/* Mobil ayarları */
-@media (max-width: 420px) {
-  body { padding: 12px; }
-  .foot-center{ font-size: 11px; }
-  .ssl-row .ssl-badge{ font-size:10.5px; padding:3px 6px; }
 }
