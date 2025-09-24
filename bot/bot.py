@@ -100,6 +100,18 @@ def log_create(con: sqlite3.Connection, chat_id: int, chat_title: str, item_id: 
         VALUES (?,?,?,?,?)
     """, (chat_id, chat_title, item_id, company or "", dt.datetime.utcnow().isoformat()))
 
+def shorten_url(long_url: str) -> str:
+    """shrtco.de API ile URL kısaltır; hata olursa uzun linki döner."""
+    try:
+        r = requests.get("https://api.shrtco.de/v2/shorten", params={"url": long_url}, timeout=10)
+        if r.ok:
+            data = r.json()
+            if data.get("ok") and "result" in data:
+                return data["result"].get("full_short_link") or long_url
+    except Exception as e:
+        log.warning("shorten_url hata: %s", e)
+    return long_url
+
 # ------------ COMMANDS ------------
 async def start(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     if chat_kind(update.effective_chat) == "private":
@@ -172,18 +184,19 @@ async def kargo(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
 
     # link ve id
     url = data.get("url", f"{API_BASE}/t/{data.get('id','')}")
+    short_url = shorten_url(url)
     track_id = data.get("id","")
 
     # İstenen formatta (tırnaksız) mesaj
     msg = (
         "Kargo Takip Sitesi hazır:\n\n"
-        f"{url}\n\n"
+        f"{short_url}\n\n"
         f"Kalan Hak : {left}\n\n"
         "Müşteriye Gönderilecek Örnek Mesaj :\n\n"
         f"Merhaba {full_name}. Ürünleriniz kargoya verilmiştir. Aşağıdaki linkten direkt kargonuzu sorgulayabilirsiniz.\n"
         f"Kargo Takip Numarası : {track_id}\n"
         "Kargo Takip Sitesi : \n"
-        f"{url}\n"
+        f"{short_url}\n"
         f"Tahmini Teslim Süresi : {eta}"
     )
     await update.message.reply_text(msg)
