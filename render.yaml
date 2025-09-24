@@ -3,7 +3,7 @@ services:
     name: kargo-web
     env: node
     rootDir: server
-    plan: free
+    plan: starter    # <— disk için starter
     buildCommand: "npm ci"
     startCommand: "npm start"
     autoDeploy: true
@@ -16,7 +16,11 @@ services:
       - key: API_TOKEN
         generateValue: true
       - key: DB_FILE
-        value: /tmp/db.sqlite   # <— Free planda kalıcı değil, restartta sıfırlanır
+        value: /data/db.sqlite   # <— kalıcı
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1
 
   - type: worker
     name: kargo-bot
@@ -29,7 +33,7 @@ services:
     envVars:
       - key: BOT_TOKEN
         sync: false
-      - key: API_TOKEN   # web'deki ile birebir aynı olacak (dashboard'dan kopyala)
+      - key: API_TOKEN
         sync: false
       - key: API_BASE
         value: https://kargo-web.onrender.com
