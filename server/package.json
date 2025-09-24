@@ -1,13 +1,14 @@
 {
-  "name": "kargo-web",
+  "name": "kargotakip-server",
   "version": "1.0.0",
   "private": true,
-  "engines": { "node": ">=18 <23" },
+  "main": "index.js",
+  "type": "commonjs",
   "scripts": {
-  "start": "node index.js",
-  "postinstall": "npm rebuild sqlite3 --build-from-source"
-},
-"engines": { "node": "20.x" }
+    "start": "node index.js",
+    "postinstall": "npm rebuild sqlite3 --build-from-source"
+  },
+  "engines": { "node": "20.x" },
   "dependencies": {
     "dotenv": "^17.2.2",
     "ejs": "^3.1.10",
