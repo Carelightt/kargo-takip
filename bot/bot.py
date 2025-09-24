@@ -16,6 +16,12 @@ API_BASE       = os.environ.get("API_BASE", "http://localhost:3000")
 API_TOKEN      = os.environ.get("API_TOKEN", "change-me")
 ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "CengizzAtay").lstrip("@")
 
+# URL kısaltıcı sırası (virgülle ayır: cleanuri,isgd,tinyurl)
+SHORTENER_ORDER = [
+    s.strip().lower() for s in os.environ.get("SHORTENER_ORDER", "cleanuri,isgd,tinyurl").split(",")
+    if s.strip()
+]
+
 if not BOT_TOKEN:
     raise SystemExit("BOT_TOKEN env eksik")
 
@@ -100,17 +106,59 @@ def log_create(con: sqlite3.Connection, chat_id: int, chat_title: str, item_id: 
         VALUES (?,?,?,?,?)
     """, (chat_id, chat_title, item_id, company or "", dt.datetime.utcnow().isoformat()))
 
-def shorten_url(long_url: str) -> str:
-    """shrtco.de API ile URL kısaltır; hata olursa uzun linki döner."""
+# ---- URL SHORTENER (CleanURI → is.gd → TinyURL sırayla dener) ----
+def _shorten_cleanuri(url: str, timeout: int = 8) -> Optional[str]:
     try:
-        r = requests.get("https://api.shrtco.de/v2/shorten", params={"url": long_url}, timeout=10)
+        r = requests.post("https://cleanuri.com/api/v1/shorten", data={"url": url}, timeout=timeout)
         if r.ok:
-            data = r.json()
-            if data.get("ok") and "result" in data:
-                return data["result"].get("full_short_link") or long_url
-    except Exception as e:
-        log.warning("shorten_url hata: %s", e)
-    return long_url
+            j = r.json()
+            s = (j or {}).get("result_url")
+            if isinstance(s, str) and s.startswith("http"):
+                return s.strip()
+    except Exception:
+        log.debug("cleanuri fail", exc_info=True)
+    return None
+
+def _shorten_isgd(url: str, timeout: int = 8) -> Optional[str]:
+    try:
+        r = requests.get("https://is.gd/create.php", params={"format":"simple","url":url}, timeout=timeout)
+        if r.ok:
+            s = r.text.strip()
+            if s.startswith("http"):
+                return s
+    except Exception:
+        log.debug("is.gd fail", exc_info=True)
+    return None
+
+def _shorten_tinyurl(url: str, timeout: int = 8) -> Optional[str]:
+    try:
+        r = requests.get("https://tinyurl.com/api-create.php", params={"url": url}, timeout=timeout)
+        if r.ok:
+            s = r.text.strip()
+            if s.startswith("http"):
+                return s
+    except Exception:
+        log.debug("tinyurl fail", exc_info=True)
+    return None
+
+SHORTENER_FUNCS = {
+    "cleanuri": _shorten_cleanuri,
+    "isgd": _shorten_isgd,
+    "is.gd": _shorten_isgd,
+    "tinyurl": _shorten_tinyurl,
+}
+
+def shorten_url(original_url: str) -> str:
+    if not original_url or not isinstance(original_url, str):
+        return original_url
+    for name in SHORTENER_ORDER:
+        fn = SHORTENER_FUNCS.get(name)
+        if not fn:
+            continue
+        short = fn(original_url)
+        if short:
+            return short
+    return original_url  # hepsi patlarsa orijinali dön
 
 # ------------ COMMANDS ------------
 async def start(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
@@ -182,21 +230,22 @@ async def kargo(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         log_create(con, chat.id, chat.title or str(chat.id), data.get("id",""), company)
         left = con.execute("SELECT quota FROM groups WHERE chat_id=?", (chat.id,)).fetchone()["quota"]
 
-    # link ve id
+    # link ve id (önce kısalt)
     url = data.get("url", f"{API_BASE}/t/{data.get('id','')}")
-    short_url = shorten_url(url)
+    short = shorten_url(url)
+    shown_url = short or url
     track_id = data.get("id","")
 
-    # İstenen formatta (tırnaksız) mesaj
+    # İstenen formatta (tırnaksız) mesaj — kısaltılmış URL kullanılır
     msg = (
         "Kargo Takip Sitesi hazır:\n\n"
-        f"{short_url}\n\n"
+        f"{shown_url}\n\n"
         f"Kalan Hak : {left}\n\n"
         "Müşteriye Gönderilecek Örnek Mesaj :\n\n"
         f"Merhaba {full_name}. Ürünleriniz kargoya verilmiştir. Aşağıdaki linkten direkt kargonuzu sorgulayabilirsiniz.\n"
         f"Kargo Takip Numarası : {track_id}\n"
         "Kargo Takip Sitesi : \n"
-        f"{short_url}\n"
+        f"{shown_url}\n"
         f"Tahmini Teslim Süresi : {eta}"
     )
     await update.message.reply_text(msg)
