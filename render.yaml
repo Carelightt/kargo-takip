@@ -1,9 +1,10 @@
 services:
+  # 1) WEB (Express + EJS + SQLite kalıcı disk)
   - type: web
     name: kargo-web
     env: node
     rootDir: server
-    plan: starter    # <— disk için starter
+    plan: starter          # <— Disk için Starter şart
     buildCommand: "npm ci"
     startCommand: "npm start"
     autoDeploy: true
@@ -12,16 +13,17 @@ services:
       - key: NODE_ENV
         value: production
       - key: BASE_URL
-        value: https://kargo-web.onrender.com
+        value: https://kargo-web.onrender.com   # ilk deploy; domain gelince değiştireceğiz
       - key: API_TOKEN
-        generateValue: true
+        generateValue: true                     # web için random secret üretir
       - key: DB_FILE
-        value: /data/db.sqlite   # <— kalıcı
+        value: /data/db.sqlite                  # kalıcı dosya
     disk:
       name: data
       mountPath: /data
       sizeGB: 1
 
+  # 2) TELEGRAM BOT (Worker)
   - type: worker
     name: kargo-bot
     env: python
@@ -32,10 +34,11 @@ services:
     autoDeploy: true
     envVars:
       - key: BOT_TOKEN
-        sync: false
-      - key: API_TOKEN
+        sync: false              # dashboard'ta elle gireceksin
+      - key: API_TOKEN           # web’deki ile birebir aynı olmalı (elle)
         sync: false
       - key: API_BASE
         value: https://kargo-web.onrender.com
       - key: ADMIN_USERNAME
         value: CengizzAtay
+
