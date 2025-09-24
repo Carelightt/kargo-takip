@@ -5,8 +5,8 @@ services:
     env: node
     rootDir: server
     plan: starter
-   buildCommand: npm install --build-from-source
-startCommand: npm start
+    buildCommand: npm install --build-from-source
+    startCommand: npm start
     autoDeploy: true
     healthCheckPath: "/health"
     envVars:
@@ -29,8 +29,8 @@ startCommand: npm start
     env: python
     rootDir: bot
     plan: free
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "python bot.py"
+    buildCommand: pip install -r requirements.txt
+    startCommand: python bot.py
     autoDeploy: true
     envVars:
       - key: BOT_TOKEN
