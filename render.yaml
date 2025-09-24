@@ -6,7 +6,6 @@ services:
     plan: starter
     buildCommand: |
       npm ci || npm install
-      npm rebuild sqlite3 --build-from-source
     startCommand: npm start
     autoDeploy: true
     healthCheckPath: "/health"
@@ -15,6 +14,8 @@ services:
         value: production
       - key: NODE_VERSION
         value: 20.12.2
+      - key: npm_config_build_from_source
+        value: "true"
       - key: BASE_URL
         value: https://kargo-web.onrender.com
       - key: API_TOKEN
@@ -26,21 +27,21 @@ services:
       mountPath: /data
       sizeGB: 1
 
-  # TELEGRAM BOT (Python worker)
   - type: worker
     name: kargo-bot
     env: python
     rootDir: bot
     plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: python bot.py
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python bot.py"
     autoDeploy: true
     envVars:
       - key: BOT_TOKEN
         sync: false
       - key: API_BASE
         value: https://kargo-web.onrender.com
-      - key: API_TOKEN   # web’deki API_TOKEN ile birebir aynı olacak (elle girilecek)
+      - key: API_TOKEN
         sync: false
       - key: ADMIN_USERNAME
         value: CengizzAtay
+
