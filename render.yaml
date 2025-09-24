@@ -1,0 +1,48 @@
+# render.yaml
+services:
+  # 1) WEB (Express + EJS + SQLite)
+  - type: web
+    name: kargo-web
+    env: node
+    rootDir: server
+    plan: free
+    buildCommand: "npm ci"
+    startCommand: "npm start"
+    autoDeploy: true
+    healthCheckPath: "/health"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # İlk deploy'da Render URL'in olacak (deploy sonrası custom domain'e çevirirsin)
+      - key: BASE_URL
+        value: https://kargo-web.onrender.com
+      # Bot ile ortak gizli anahtar — web için random üret
+      - key: API_TOKEN
+        generateValue: true
+      # SQLite kalıcı disk dosyası
+      - key: DB_FILE
+        value: /data/db.sqlite
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1
+
+  # 2) TELEGRAM BOT (Python Worker)
+  - type: worker
+    name: kargo-bot
+    env: python
+    rootDir: bot
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python bot.py"
+    autoDeploy: true
+    envVars:
+      # Bunları dashboard'ta elle gireceksin:
+      - key: BOT_TOKEN
+        sync: false
+      - key: API_TOKEN        # web'deki API_TOKEN ile birebir aynı olmalı
+        sync: false
+      - key: API_BASE         # ilk etapta web'in Render URL'i; domain gelince güncelle
+        value: https://kargo-web.onrender.com
+      - key: ADMIN_USERNAME
+        value: CengizzAtay
