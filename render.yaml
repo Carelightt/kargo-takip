@@ -1,28 +1,43 @@
 services:
+  # WEB (Node/Express + kalıcı disk)
   - type: web
     name: kargo-web
     env: node
-    plan: free
-    buildCommand: "npm ci"
-    startCommand: "node index.js"
+    rootDir: server
+    plan: starter
+    buildCommand: "npm install"
+    startCommand: "npm start"
+    autoDeploy: true
+    healthCheckPath: "/health"
     envVars:
-      - key: API_TOKEN
-        value: b7c2d5e1f4a93d74b0c8a2f9e1c3d6a8
+      - key: NODE_ENV
+        value: production
       - key: BASE_URL
         value: https://kargo-web.onrender.com
+      - key: API_TOKEN
+        generateValue: true
+      - key: DB_FILE
+        value: /data/db.sqlite
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1
 
+  # TELEGRAM BOT (Python worker)
   - type: worker
     name: kargo-bot
     env: python
+    rootDir: bot
     plan: free
     buildCommand: "pip install -r requirements.txt"
     startCommand: "python bot.py"
+    autoDeploy: true
     envVars:
       - key: BOT_TOKEN
-        value: <telegram tokenin>
+        sync: false
       - key: API_BASE
         value: https://kargo-web.onrender.com
-      - key: API_TOKEN
-        value: b7c2d5e1f4a93d74b0c8a2f9e1c3d6a8
+      - key: API_TOKEN   # web’deki API_TOKEN ile birebir aynı olacak (elle girilecek)
+        sync: false
       - key: ADMIN_USERNAME
         value: CengizzAtay
