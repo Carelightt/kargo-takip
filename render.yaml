@@ -5,21 +5,18 @@ services:
     rootDir: server
     plan: starter
     buildCommand: |
-      npm ci || npm install
+      npm install
+      npm rebuild sqlite3 --build-from-source
     startCommand: npm start
     autoDeploy: true
     healthCheckPath: "/health"
     envVars:
       - key: NODE_ENV
         value: production
-      - key: NODE_VERSION
-        value: 20.12.2
-      - key: npm_config_build_from_source
-        value: "true"
       - key: BASE_URL
         value: https://kargo-web.onrender.com
       - key: API_TOKEN
-        generateValue: true
+        sync: false
       - key: DB_FILE
         value: /data/db.sqlite
     disk:
