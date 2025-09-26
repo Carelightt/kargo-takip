@@ -6,6 +6,71 @@
   <title>Kargo Takip • <%= item.id %></title>
   <link rel="stylesheet" href="/public/widget.css?v=6" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22></text></svg>">
+
+  <!-- Bu sayfaya özel ufak stiller -->
+  <style>
+    /* Teslim edilemedi görsel durumu (son noktada animasyonlu X) */
+    .timeline.failed .dot:last-child .dot-inner {
+      position: relative;
+      background: #3a1b1b !important;
+      border-color: #e5484d !important;
+      box-shadow: 0 6px 18px rgba(229,72,77,.35);
+      color: #fff !important;
+      transform: translateY(-2px) scale(1);
+    }
+    .timeline.failed .dot:last-child .dot-inner::before,
+    .timeline.failed .dot:last-child .dot-inner::after{
+      content:"";
+      position:absolute; left:50%; top:50%;
+      width: 18px; height: 2px;
+      background:#ff6b6f;
+      transform-origin: center;
+      border-radius: 2px;
+      opacity: 0; transform: translate(-50%,-50%) rotate(45deg) scale(0.8);
+      animation: xpop .45s ease-out forwards .05s;
+    }
+    .timeline.failed .dot:last-child .dot-inner::after{
+      transform: translate(-50%,-50%) rotate(-45deg) scale(0.8);
+      animation-delay: .12s;
+    }
+    @keyframes xpop {
+      from { opacity:0; transform: translate(-50%,-50%) rotate(var(--r,45deg)) scale(.6); }
+      to   { opacity:1; transform: translate(-50%,-50%) rotate(var(--r,45deg)) scale(1); }
+    }
+
+    /* Çizgiyi kırmızıya çek */
+    .timeline.failed .line .line-fill {
+      background: linear-gradient(90deg, #ff4d4f, #ff7875);
+      filter: brightness(1.05);
+    }
+
+    /* Basit modal */
+    .modal-backdrop{
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.55);
+      display:none; align-items:center; justify-content:center;
+      z-index: 1000;
+    }
+    .modal{
+      width: min(560px, 92vw);
+      background: var(--card);
+      border:1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.4);
+      text-align: left;
+      animation: modalin .18s ease-out;
+    }
+    .modal h3{ margin: 0 0 6px 0; font-size: 18px; }
+    .modal p { margin: 6px 0 14px 0; font-size: 14px; color: var(--muted); line-height: 1.5; }
+    .modal .btn-row{ display:flex; justify-content:flex-end; gap:8px; }
+    .modal .btn-ok{
+      border:1px solid var(--border);
+      background: color-mix(in srgb, var(--card), transparent 12%);
+      padding:8px 12px; border-radius:10px; cursor:pointer; font-size:14px;
+    }
+    @keyframes modalin { from{ transform: translateY(8px); opacity:0 } to{ transform:none; opacity:1 } }
+  </style>
 </head>
 <body>
   <div class="bg-grad"></div>
@@ -36,11 +101,11 @@
     </section>
 
     <!-- Çizgi aktif adıma kadar dolacak -->
-    <section class="timeline">
+    <section class="timeline" id="timeline">
       <div class="line">
-        <div class="line-fill" style="width: <%= fillPercent %>%"></div>
+        <div class="line-fill" id="lineFill" style="width: <%= fillPercent %>%"></div>
       </div>
-      <div class="dots">
+      <div class="dots" id="dots">
         <% steps.forEach(function(step, i){ %>
           <div class="dot <%= i <= activeIndex ? 'active' : '' %> <%= i === activeIndex ? 'pulse' : '' %>">
             <div class="dot-inner"><%= i+1 %></div>
@@ -50,12 +115,11 @@
       </div>
     </section>
 
-      <!-- QR -->
-<section class="qr-row">
-  <img alt="Takip QR" width="120" height="120"
-       src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=<%= encodeURIComponent(baseUrl + '/t/' + item.id) %>">
-</section>
-
+    <!-- QR -->
+    <section class="qr-row">
+      <img alt="Takip QR" width="120" height="120"
+           src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=<%= encodeURIComponent(baseUrl + '/t/' + item.id) %>">
+    </section>
 
     <!-- SSL rozetleri (QR altında) -->
     <div class="ssl-row">
@@ -70,9 +134,21 @@
         <button id="contactBtn" class="btn primary">Kuryeyle İletişime Geç</button>
       </div>
     </footer>
-
-
   </main>
+
+  <!-- Teslim edilemedi bildirimi (tek butonlu) -->
+  <div id="failBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="failTitle" aria-describedby="failText">
+    <div class="modal">
+      <h3 id="failTitle">Teslim Edilemedi</h3>
+      <p id="failText">
+        Kuryemiz adresinize geldi fakat size ulaşamadı. İade süreci başlatılmıştır.
+        Lütfen bilgi ve destek için sizinle iletişime geçen destek birimimizle iletişime geçin.
+      </p>
+      <div class="btn-row">
+        <button id="failOk" class="btn-ok">Tamam</button>
+      </div>
+    </div>
+  </div>
 
   <script>
   // Tema switch
@@ -93,19 +169,13 @@
     const copyBtn  = document.getElementById('copyBtn');
     const shareBtn = document.getElementById('shareBtn');
     const printBtn = document.getElementById('printBtn');
-
     copyBtn?.addEventListener('click', async () => {
       try { await navigator.clipboard.writeText(link); alert('Link kopyalandı ✔'); } catch {}
     });
-
     shareBtn?.addEventListener('click', async () => {
-      if (navigator.share) {
-        try { await navigator.share({ title: 'Kargo Takip', url: link }); } catch {}
-      } else {
-        alert('Tarayıcı paylaşımı yok');
-      }
+      if (navigator.share) { try { await navigator.share({ title: 'Kargo Takip', url: link }); } catch {} }
+      else { alert('Tarayıcı paylaşımı yok'); }
     });
-
     printBtn?.addEventListener('click', () => window.print());
   })();
 
@@ -120,7 +190,7 @@
     }
   })();
 
-  // Kuryeyle iletişim butonu
+  // Kuryeyle iletişim butonu (sadece "Dağıtımda" iken aktif)
   (function () {
     const status = "<%= item.status %>";
     const btn = document.getElementById('contactBtn');
@@ -133,9 +203,36 @@
     });
   })();
 
+  // Teslim edilemedi modali + zamanlanmış akışın görseli
+  (function () {
+    const status = "<%= item.status %>";
+    const id     = "<%= item.id %>";
+    const seenKey = "fail_seen_" + id;
+
+    if (status === "Teslim edilemedi") {
+      // Çizgiyi full yap + kırmızıya boya + son etiketi değiştir + X animasyonu
+      document.getElementById('timeline')?.classList.add('failed');
+      const fill = document.getElementById('lineFill');
+      if (fill) fill.style.width = '100%';
+      // Son etiketi "Teslim edilemedi" yap
+      const dots = document.querySelectorAll('.timeline .dot .dot-label');
+      if (dots.length) dots[dots.length - 1].textContent = 'Teslim edilemedi';
+
+      // Modalı bir kez göster
+      if (!localStorage.getItem(seenKey)) {
+        const backdrop = document.getElementById('failBackdrop');
+        const ok = document.getElementById('failOk');
+        backdrop.style.display = 'flex';
+        ok.addEventListener('click', () => {
+          backdrop.style.display = 'none';
+          localStorage.setItem(seenKey, '1');
+        });
+      }
+    }
+  })();
+
   // Sağ tık menüsü engel
   document.addEventListener('contextmenu', e => e.preventDefault());
-
   // F12, Ctrl+Shift+I/J, Ctrl+U engel
   document.addEventListener('keydown', e => {
     if (e.key === "F12") { e.preventDefault(); return false; }
@@ -143,7 +240,6 @@
       e.preventDefault(); return false;
     }
   });
-</script>
-
+  </script>
 </body>
 </html>
