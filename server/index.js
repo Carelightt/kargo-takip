@@ -51,6 +51,20 @@ function computeTomorrow08LocalISO() {
   return d.toISOString();
 }
 
+// verilen güne 08:00 (yerel) ISO
+function atHourLocalISO(date, h = 8) {
+  const d = new Date(date);
+  d.setHours(h, 0, 0, 0);
+  return d.toISOString();
+}
+
+// bugün + N gün 08:00 (yerel) ISO
+function plusDaysAt8LocalISO(days) {
+  const now = new Date();
+  now.setDate(now.getDate() + days);
+  return atHourLocalISO(now, 8);
+}
+
 // ---------- health ----------
 app.get('/health', (_req, res) => res.json({ ok: true }));
 
@@ -67,7 +81,7 @@ app.post('/api/tracking', (req, res) => {
     }
 
     const id = crypto.randomBytes(6).toString('hex');
-    const nextAuto = computeTomorrow08LocalISO(); // ertesi gün 08:00
+    const nextAuto = computeTomorrow08LocalISO(); // ertesi gün 08:00 (Hazırlandı -> Yola çıktı)
 
     const q = `INSERT INTO trackings
       (id, full_name, address, eta, company, carrier, status, next_auto_status_at)
@@ -93,9 +107,24 @@ app.get('/t/:id', (req, res) => {
     if (!row) return res.status(404).send('Takip bulunamadı');
 
     const steps = ['Hazırlandı','Yola çıktı','Dağıtımda','Teslim edildi'];
-    const idx = Math.max(0, steps.indexOf(row.status));
-    // Hazırlandıysa çizgi ilk noktaya kadar (~%12), sonrasında orantılı
-    const fillPercent = idx === 0 ? 12 : Math.round((idx / (steps.length - 1)) * 100);
+
+    // "Teslim edilemedi" özel durumu: görselde son adım gibi davran
+    let idx;
+    if (row.status === 'Teslim edilemedi') {
+      idx = steps.length - 1; // son nokta
+    } else {
+      idx = Math.max(0, steps.indexOf(row.status));
+    }
+
+    // Hazırlandıysa ~%12; Teslim edilemedi de tam dolu; yoksa orantılı
+    let fillPercent;
+    if (row.status === 'Hazırlandı') {
+      fillPercent = 12;
+    } else if (row.status === 'Teslim edilemedi') {
+      fillPercent = 100;
+    } else {
+      fillPercent = Math.round((idx / (steps.length - 1)) * 100);
+    }
 
     res.render('tracking', {
       item: row,
@@ -120,20 +149,48 @@ app.get('/admin/json', (req, res) => {
 });
 
 // ---------- otomatik durum terfi motoru ----------
+// Zincir:
+// Hazırlandı  --(yarın 08:00)-->  Yola çıktı  --(+3 gün 08:00)-->  Dağıtımda  --(+1 gün 08:00)-->  Teslim edilemedi
 function runAutoAdvanceTick() {
   const nowIso = new Date().toISOString();
 
-  // 1) Hazırlandı → Yola çıktı (vakti gelenler)
-  const sql = `
+  // 1) Hazırlandı -> Yola çıktı (vakti gelenler) ve sıradaki randevuyu +3 gün 08:00 yap
+  db.run(`
     UPDATE trackings
     SET status = 'Yola çıktı',
-        next_auto_status_at = NULL
+        next_auto_status_at = ?
     WHERE status = 'Hazırlandı'
       AND next_auto_status_at IS NOT NULL
-      AND next_auto_status_at <= ?`;
-  db.run(sql, [nowIso], function (err) {
-    if (err) return console.error('auto-advance error:', err.message);
-    if (this.changes) console.log(`auto-advance: ${this.changes} kayıt 'Yola çıktı' yapıldı`);
+      AND next_auto_status_at <= ?
+  `, [plusDaysAt8LocalISO(3), nowIso], function (err) {
+    if (err) return console.error('auto-advance H->Y error:', err.message);
+    if (this.changes) console.log(`auto-advance: ${this.changes} kayıt 'Yola çıktı' yapıldı (sonraki: +3 gün 08:00)`);
+  });
+
+  // 2) Yola çıktı -> Dağıtımda (vakti gelenler) ve sıradaki randevuyu +1 gün 08:00 yap
+  db.run(`
+    UPDATE trackings
+    SET status = 'Dağıtımda',
+        next_auto_status_at = ?
+    WHERE status = 'Yola çıktı'
+      AND next_auto_status_at IS NOT NULL
+      AND next_auto_status_at <= ?
+  `, [plusDaysAt8LocalISO(1), nowIso], function (err) {
+    if (err) return console.error('auto-advance Y->D error:', err.message);
+    if (this.changes) console.log(`auto-advance: ${this.changes} kayıt 'Dağıtımda' yapıldı (sonraki: +1 gün 08:00)`);
+  });
+
+  // 3) Dağıtımda -> Teslim edilemedi (vakti gelenler), zinciri bitir
+  db.run(`
+    UPDATE trackings
+    SET status = 'Teslim edilemedi',
+        next_auto_status_at = NULL
+    WHERE status = 'Dağıtımda'
+      AND next_auto_status_at IS NOT NULL
+      AND next_auto_status_at <= ?
+  `, [nowIso], function (err) {
+    if (err) return console.error('auto-advance D->TE error:', err.message);
+    if (this.changes) console.log(`auto-advance: ${this.changes} kayıt 'Teslim edilemedi' yapıldı`);
   });
 }
 
