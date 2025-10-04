@@ -16,12 +16,6 @@ API_BASE       = os.environ.get("API_BASE", "http://localhost:3000")
 API_TOKEN      = os.environ.get("API_TOKEN", "change-me")
 ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "CengizzAtay").lstrip("@")
 
-# URL kısaltıcı sırası (virgülle ayır: cleanuri,isgd,tinyurl)
-SHORTENER_ORDER = [
-    s.strip().lower() for s in os.environ.get("SHORTENER_ORDER", "cleanuri,isgd,tinyurl").split(",")
-    if s.strip()
-]
-
 if not BOT_TOKEN:
     raise SystemExit("BOT_TOKEN env eksik")
 
@@ -63,7 +57,7 @@ def is_admin(user) -> bool:
     return (user and (user.username or "").lower() == ADMIN_USERNAME.lower())
 
 def chat_kind(chat: Chat) -> str:
-    return chat.type  # "private", "group", "supergroup", "channel"
+    return chat.type
 
 def today_range_iso(tz: Optional[dt.tzinfo]=None):
     now = dt.datetime.now(tz)
@@ -106,60 +100,6 @@ def log_create(con: sqlite3.Connection, chat_id: int, chat_title: str, item_id: 
         VALUES (?,?,?,?,?)
     """, (chat_id, chat_title, item_id, company or "", dt.datetime.utcnow().isoformat()))
 
-# ---- URL SHORTENER (CleanURI → is.gd → TinyURL sırayla dener) ----
-def _shorten_cleanuri(url: str, timeout: int = 8) -> Optional[str]:
-    try:
-        r = requests.post("https://cleanuri.com/api/v1/shorten", data={"url": url}, timeout=timeout)
-        if r.ok:
-            j = r.json()
-            s = (j or {}).get("result_url")
-            if isinstance(s, str) and s.startswith("http"):
-                return s.strip()
-    except Exception:
-        log.debug("cleanuri fail", exc_info=True)
-    return None
-
-def _shorten_isgd(url: str, timeout: int = 8) -> Optional[str]:
-    try:
-        r = requests.get("https://is.gd/create.php", params={"format":"simple","url":url}, timeout=timeout)
-        if r.ok:
-            s = r.text.strip()
-            if s.startswith("http"):
-                return s
-    except Exception:
-        log.debug("is.gd fail", exc_info=True)
-    return None
-
-def _shorten_tinyurl(url: str, timeout: int = 8) -> Optional[str]:
-    try:
-        r = requests.get("https://tinyurl.com/api-create.php", params={"url": url}, timeout=timeout)
-        if r.ok:
-            s = r.text.strip()
-            if s.startswith("http"):
-                return s
-    except Exception:
-        log.debug("tinyurl fail", exc_info=True)
-    return None
-
-SHORTENER_FUNCS = {
-    "cleanuri": _shorten_cleanuri,
-    "isgd": _shorten_isgd,
-    "is.gd": _shorten_isgd,
-    "tinyurl": _shorten_tinyurl,
-}
-
-def shorten_url(original_url: str) -> str:
-    if not original_url or not isinstance(original_url, str):
-        return original_url
-    for name in SHORTENER_ORDER:
-        fn = SHORTENER_FUNCS.get(name)
-        if not fn:
-            continue
-        short = fn(original_url)
-        if short:
-            return short
-    return original_url  # hepsi patlarsa orijinali dön
-
 # ------------ COMMANDS ------------
 async def start(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     if chat_kind(update.effective_chat) == "private":
@@ -199,7 +139,6 @@ async def kargo(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("Hakkınız yoktur. Lütfen @CengizzAtay yaz.")
             return
 
-    # API'ye gönder
     try:
         payload = {
             "full_name": full_name,
@@ -224,19 +163,15 @@ async def kargo(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Sunucuya ulaşılamadı veya hata oluştu.")
         return
 
-    # kota düş, log at, kalan hak
     with db() as con:
         dec_quota(con, chat.id)
         log_create(con, chat.id, chat.title or str(chat.id), data.get("id",""), company)
         left = con.execute("SELECT quota FROM groups WHERE chat_id=?", (chat.id,)).fetchone()["quota"]
 
-    # link ve id (önce kısalt)
     url = data.get("url", f"{API_BASE}/t/{data.get('id','')}")
-    short = shorten_url(url)
-    shown_url = short or url
+    shown_url = url
     track_id = data.get("id","")
 
-    # İstenen formatta (tırnaksız) mesaj — kısaltılmış URL kullanılır
     msg = (
         "Kargo Takip Sitesi hazır:\n\n"
         f"{shown_url}\n\n"
@@ -250,7 +185,6 @@ async def kargo(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     )
     await update.message.reply_text(msg)
 
-# /kalanhak — grubun kalan hakkını göster
 async def kalanhak(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     if chat_kind(chat) == "private":
@@ -262,7 +196,6 @@ async def kalanhak(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     status = "Kapalı" if g["disabled"] else "Açık"
     await update.message.reply_text(f"Grup: {g['title']}\nDurum: {status}\nKalan Hak: {g['quota']}")
 
-# /hakver <sayi>  (sadece admin)
 async def hakver(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     if not is_admin(user):
@@ -277,7 +210,6 @@ async def hakver(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         set_quota(con, chat.id, chat.title or str(chat.id), quota)
     await update.message.reply_text(f"Bu gruba {quota} hak verildi.")
 
-# /bitir (sadece admin)
 async def bitir(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     if not is_admin(user):
@@ -287,7 +219,6 @@ async def bitir(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         set_disabled(con, chat.id, chat.title or str(chat.id), True)
     await update.message.reply_text("Bu grup için işlemler kapatıldı.")
 
-# /rapor (sadece admin)
 async def rapor(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     if not is_admin(user):
@@ -329,12 +260,10 @@ async def rapor(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
             .replace("-", "\\-").replace(".", "\\.")
     )
 
-# ------------ FALLBACKS ------------
 async def unknown_dm(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     if chat_kind(update.effective_chat) == "private":
         await update.message.reply_text("Lütfen @CengizzAtay ile iletişime geçin.")
 
-# ------------ MAIN ------------
 def main():
     app = Application.builder().token(BOT_TOKEN).build()
 
@@ -345,7 +274,6 @@ def main():
     app.add_handler(CommandHandler("bitir", bitir))
     app.add_handler(CommandHandler("rapor", rapor))
 
-    # DM: özelde yazılan her şeye cevap
     app.add_handler(MessageHandler(filters.ChatType.PRIVATE & ~filters.COMMAND, dm_guard))
     app.add_handler(MessageHandler(filters.ChatType.PRIVATE & filters.COMMAND, dm_guard))
     app.add_handler(MessageHandler(filters.ChatType.PRIVATE, unknown_dm))
