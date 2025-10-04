@@ -57,7 +57,7 @@ def is_admin(user) -> bool:
     return (user and (user.username or "").lower() == ADMIN_USERNAME.lower())
 
 def chat_kind(chat: Chat) -> str:
-    return chat.type
+    return chat.type  # "private", "group", "supergroup", "channel"
 
 def today_range_iso(tz: Optional[dt.tzinfo]=None):
     now = dt.datetime.now(tz)
@@ -139,6 +139,7 @@ async def kargo(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("Hakkınız yoktur. Lütfen @CengizzAtay yaz.")
             return
 
+    # API'ye gönder
     try:
         payload = {
             "full_name": full_name,
@@ -163,13 +164,14 @@ async def kargo(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Sunucuya ulaşılamadı veya hata oluştu.")
         return
 
+    # kota düş, log at, kalan hak
     with db() as con:
         dec_quota(con, chat.id)
         log_create(con, chat.id, chat.title or str(chat.id), data.get("id",""), company)
         left = con.execute("SELECT quota FROM groups WHERE chat_id=?", (chat.id,)).fetchone()["quota"]
 
-    url = data.get("url", f"{API_BASE}/t/{data.get('id','')}")
-    shown_url = url
+    # Direkt URL (kısaltma yok)
+    shown_url = data.get("url", f"{API_BASE}/t/{data.get('id','')}")
     track_id = data.get("id","")
 
     msg = (
@@ -185,6 +187,7 @@ async def kargo(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     )
     await update.message.reply_text(msg)
 
+# /kalanhak — grubun kalan hakkını göster
 async def kalanhak(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     if chat_kind(chat) == "private":
@@ -196,6 +199,7 @@ async def kalanhak(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     status = "Kapalı" if g["disabled"] else "Açık"
     await update.message.reply_text(f"Grup: {g['title']}\nDurum: {status}\nKalan Hak: {g['quota']}")
 
+# /hakver <sayi>  (sadece admin)
 async def hakver(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     if not is_admin(user):
@@ -210,6 +214,7 @@ async def hakver(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         set_quota(con, chat.id, chat.title or str(chat.id), quota)
     await update.message.reply_text(f"Bu gruba {quota} hak verildi.")
 
+# /bitir (sadece admin)
 async def bitir(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     if not is_admin(user):
@@ -219,6 +224,7 @@ async def bitir(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         set_disabled(con, chat.id, chat.title or str(chat.id), True)
     await update.message.reply_text("Bu grup için işlemler kapatıldı.")
 
+# /rapor (sadece admin)
 async def rapor(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     if not is_admin(user):
@@ -260,24 +266,15 @@ async def rapor(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
             .replace("-", "\\-").replace(".", "\\.")
     )
 
-async def unknown_dm(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
-    if chat_kind(update.effective_chat) == "private":
-        await update.message.reply_text("Lütfen @CengizzAtay ile iletişime geçin.")
-
+# ------------ MAIN ------------
 def main():
     app = Application.builder().token(BOT_TOKEN).build()
-
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("kargo", kargo))
     app.add_handler(CommandHandler("kalanhak", kalanhak))
     app.add_handler(CommandHandler("hakver", hakver))
     app.add_handler(CommandHandler("bitir", bitir))
     app.add_handler(CommandHandler("rapor", rapor))
-
-    app.add_handler(MessageHandler(filters.ChatType.PRIVATE & ~filters.COMMAND, dm_guard))
-    app.add_handler(MessageHandler(filters.ChatType.PRIVATE & filters.COMMAND, dm_guard))
-    app.add_handler(MessageHandler(filters.ChatType.PRIVATE, unknown_dm))
-
     log.info("Bot starting…")
     app.run_polling()
 
