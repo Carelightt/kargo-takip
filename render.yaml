@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: kargo-web
+    env: node
+    rootDir: server
+    plan: starter
+    buildCommand: |
+      npm install
+      npm rebuild sqlite3 --build-from-source
+    startCommand: npm start
+    autoDeploy: true
+    healthCheckPath: "/health"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: BASE_URL
+        value: https://kargo-web.onrender.com
+      - key: API_TOKEN
+        sync: false
+      - key: DB_FILE
+        value: /data/db.sqlite
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1
+
+  - type: worker
+    name: kargo-bot
+    env: python
+    rootDir: bot
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python bot.py"
+    autoDeploy: true
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: API_BASE
+        value: https://kargo-web.onrender.com
+      - key: API_TOKEN
+        sync: false
+      - key: ADMIN_USERNAME
+        value: CengizzAtay
+
