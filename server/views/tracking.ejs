@@ -34,26 +34,21 @@
       <div><div class="label">Tahmini Varış</div>
         <div class="val">
           <% 
+            let formattedDate = item.eta; // Varsayılan: Orijinal tarih
             try {
-              // Sunucudan gelen '2025-11-03' tarihini al
-              const dateObj = new Date(item.eta);
-              // Tarihi 'tr-TR' (Türkiye) formatına (03.11.2025) çevir
-              const formattedDate = dateObj.toLocaleDateString('tr-TR', {
-                day: '2-digit', 
-                month: '2-digit', 
-                year: 'numeric' 
-              });
+              // Tarih '2025-11-03' formatında mı (yani '-' içeriyor mu) diye kontrol et
+              if (item.eta && item.eta.includes('-')) {
+                const parts = item.eta.split('-');
+                // Formatı YYYY-MM-DD'den GG.AA.YYYY'ye çevir
+                if (parts.length === 3) {
+                  formattedDate = `${parts[2]}.${parts[1]}.${parts[0]}`;
+                }
+              }
+            } catch (e) {
+              // Bir hata olursa, formattedDate zaten orijinal 'item.eta' olarak kalacak.
+            }
           %>
-            <%= formattedDate %> <% 
-            } catch (e) { 
-              // Eğer tarih formatı bozuksa (örn: "Yarın" yazıyorsa) veya parse edilemezse
-              // orijinal metni bas, hata verme
-          %>
-            <%= item.eta %> 
-          <% 
-            } 
-          %>
-          <span id="etaRel" class="eta-rel"></span>
+          <%= formattedDate %> <span id="etaRel" class="eta-rel"></span>
         </div>
       </div>
       <div><div class="label">Durum</div><div class="badge"><%= item.status %></div></div>
