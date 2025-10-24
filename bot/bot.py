@@ -29,6 +29,7 @@ if not BOT_TOKEN:
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
 log = logging.getLogger("kargo-bot")
 
+# ...
 # ------------ DB ------------
 # Render Kalıcı Diski için DATA_DIR ortam değişkenini kullan
 # Lokal test için varsayılan '.' (içinde bulunduğu klasör) olarak ayarlandı
@@ -36,6 +37,7 @@ DATA_DIR = Path(os.environ.get("DATA_DIR", "."))
 DB_PATH = DATA_DIR / "bot_state.sqlite"
 
 def db() -> sqlite3.Connection:
+# ...
     con = sqlite3.connect(DB_PATH)
     con.row_factory = sqlite3.Row
     return con
