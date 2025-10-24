@@ -13,7 +13,6 @@
   <main class="card glass">
     <header class="top">
       <div class="head-left">
-        <!-- Yurtiçi logo -->
         <img class="carrier-logo big" src="/public/carriers/yurtici.png" alt="Yurtiçi Kargo" onerror="this.style.display='none'">
         <% if (item.company) { %>
           <span class="firm-name"><%= item.company %></span>
@@ -31,11 +30,35 @@
     <section class="grid">
       <div><div class="label">Ad Soyad</div><div class="val"><%= item.full_name %></div></div>
       <div><div class="label">Adres</div><div class="val"><%= item.address %></div></div>
-      <div><div class="label">Tahmini Varış</div><div class="val"><%= item.eta %> <span id="etaRel" class="eta-rel"></span></div></div>
+      
+      <div><div class="label">Tahmini Varış</div>
+        <div class="val">
+          <% 
+            try {
+              // Sunucudan gelen '2025-11-03' tarihini al
+              const dateObj = new Date(item.eta);
+              // Tarihi 'tr-TR' (Türkiye) formatına (03.11.2025) çevir
+              const formattedDate = dateObj.toLocaleDateString('tr-TR', {
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric' 
+              });
+          %>
+            <%= formattedDate %> <% 
+            } catch (e) { 
+              // Eğer tarih formatı bozuksa (örn: "Yarın" yazıyorsa) veya parse edilemezse
+              // orijinal metni bas, hata verme
+          %>
+            <%= item.eta %> 
+          <% 
+            } 
+          %>
+          <span id="etaRel" class="eta-rel"></span>
+        </div>
+      </div>
       <div><div class="label">Durum</div><div class="badge"><%= item.status %></div></div>
     </section>
 
-    <!-- Çizgi aktif adıma kadar dolacak -->
     <section class="timeline">
       <div class="line">
         <div class="line-fill" style="width: <%= fillPercent %>%"></div>
@@ -50,20 +73,17 @@
       </div>
     </section>
 
-      <!-- QR -->
-<section class="qr-row">
+      <section class="qr-row">
   <img alt="Takip QR" width="120" height="120"
        src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=<%= encodeURIComponent(baseUrl + '/t/' + item.id) %>">
 </section>
 
 
-    <!-- SSL rozetleri (QR altında) -->
     <div class="ssl-row">
       <span class="ssl-badge" title="SSL Etkin">🔒 SSL</span>
       <span class="ssl-badge" title="Güvenli İletişim">🛡️ Güvenli</span>
     </div>
 
-    <!-- Footer -->
     <footer class="card-footer">
       <div class="foot-center">© 2025 Yurtiçi Kargo. Tüm Hakları Saklıdır.</div>
       <div class="foot-right">
