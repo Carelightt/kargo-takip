@@ -29,7 +29,6 @@ if not BOT_TOKEN:
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
 log = logging.getLogger("kargo-bot")
 
-# ...
 # ------------ DB ------------
 # Render Kalıcı Diski için DATA_DIR ortam değişkenini kullan
 # Lokal test için varsayılan '.' (içinde bulunduğu klasör) olarak ayarlandı
@@ -37,7 +36,6 @@ DATA_DIR = Path(os.environ.get("DATA_DIR", "."))
 DB_PATH = DATA_DIR / "bot_state.sqlite"
 
 def db() -> sqlite3.Connection:
-# ...
     con = sqlite3.connect(DB_PATH)
     con.row_factory = sqlite3.Row
     return con
@@ -195,7 +193,6 @@ async def kargo(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     # eta -> eta_str olarak değiştirdim, çünkü orijinal string'e ihtiyacımız var
     full_name, address, eta_str, company = lines[0], lines[1], lines[2], lines[3]
 
-    # --- DÜZELTME BAŞLANGICI ---
     # Tarihi API'ye göndermeden önce parse et ve ISO formatına (YYYY-MM-DD) çevir
     # Bu, DD.MM.YYYY ve MM.DD.YYYY karışıklığını önler.
     api_eta = eta_str  # Başarısız olursa varsayılan olarak orijinal string'i kullan
@@ -212,7 +209,6 @@ async def kargo(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         # orijinal string'i (eta_str) göndermeyi dene.
         log.warning(f"ETA tarihi parse edilemedi: {eta_str}. Orijinal değer gönderiliyor.")
         api_eta = eta_str # Zaten eta_str idi, sadece emin olmak için.
-    # --- DÜZELTME SONU ---
 
     with db() as con:
         upsert_group(con, chat.id, chat.title or str(chat.id))
@@ -255,13 +251,15 @@ async def kargo(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         log_create(con, chat.id, chat.title or str(chat.id), data.get("id",""), company)
         left = con.execute("SELECT quota FROM groups WHERE chat_id=?", (chat.id,)).fetchone()["quota"]
 
-    # link ve id (önce kısalt)
+    # --- DÜZELTME: LİNK KISALTICI KALDIRILDI ---
     url = data.get("url", f"{API_BASE}/t/{data.get('id','')}")
-    short = shorten_url(url)
-    shown_url = short or url
+    # short = shorten_url(url) # <-- Kısaltıcı devre dışı
+    # shown_url = short or url # <-- Kısaltıcı devre dışı
+    shown_url = url # <-- Orijinal URL kullanılıyor
     track_id = data.get("id","")
+    # --- DÜZELTME SONU ---
 
-    # İstenen formatta (tırnaksız) mesaj — kısaltılmış URL kullanılır
+    # İstenen formatta (tırnaksız) mesaj — orijinal URL kullanılır
     msg = (
         "Kargo Takip Sitesi hazır:\n\n"
         f"{shown_url}\n\n"
@@ -271,7 +269,8 @@ async def kargo(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         f"Kargo Takip Numarası : {track_id}\n"
         "Kargo Takip Sitesi : \n"
         f"{shown_url}\n"
-        f"Tahmini Teslim Süresi : {eta_str}" # <-- Burada kullanıcının girdiği orijinal formatı (eta_str) göster
+        # Burası zaten senin istediğin gibi (GG.AA.YYYY) formatını gösteriyor
+        f"Tahmini Teslim Süresi : {eta_str}" 
     )
     await update.message.reply_text(msg)
 
