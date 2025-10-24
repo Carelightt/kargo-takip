@@ -1,3 +1,13 @@
+# Python Sanal Ortamı
+bot/.venv/
+__pycache__/
+
+# Veritabanı dosyaları (Bunlar Render Diskte olmalı)
+*.sqlite
+*.sqlite3
+
+# Node.js bağımlılıkları (Render bunları kendi kurar)
 node_modules/
-server/node_modules/
-*.log
+
+# Mac/Windows sistem dosyaları
+.DS_Store
