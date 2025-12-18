@@ -29,36 +29,46 @@ if not BOT_TOKEN:
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
 log = logging.getLogger("kargo-bot")
 
-# ------------ DB ------------
-# Render Kalıcı Diski için DATA_DIR ortam değişkenini kullan
-# Lokal test için varsayılan '.' (içinde bulunduğu klasör) olarak ayarlandı
-DATA_DIR = Path(os.environ.get("DATA_DIR", "."))
-DB_PATH = DATA_DIR / "bot_state.sqlite"
+# ------------ DB (GÜNCELLENDİ) ------------
+# Render'da "unable to open database file" hatasını önlemek için tam yol kullanıyoruz.
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.environ.get("DATA_DIR", BASE_DIR)
+DB_PATH = os.path.join(DATA_DIR, "bot_state.sqlite")
 
 def db() -> sqlite3.Connection:
-    con = sqlite3.connect(DB_PATH)
+    # check_same_thread=False: Bot asenkron olduğu için SQLite çökmesini önler.
+    con = sqlite3.connect(DB_PATH, check_same_thread=False)
     con.row_factory = sqlite3.Row
     return con
 
 def init_db():
-    with db() as con:
-        con.executescript("""
-        CREATE TABLE IF NOT EXISTS groups (
-            chat_id    INTEGER PRIMARY KEY,
-            title      TEXT,
-            quota      INTEGER DEFAULT 0,
-            disabled   INTEGER DEFAULT 0,
-            updated_at TEXT
-        );
-        CREATE TABLE IF NOT EXISTS logs (
-            id         INTEGER PRIMARY KEY AUTOINCREMENT,
-            chat_id    INTEGER,
-            chat_title TEXT,
-            item_id    TEXT,
-            company    TEXT,
-            created_at TEXT
-        );
-        """)
+    try:
+        with db() as con:
+            con.executescript("""
+            CREATE TABLE IF NOT EXISTS groups (
+                chat_id    INTEGER PRIMARY KEY,
+                title      TEXT,
+                quota      INTEGER DEFAULT 0,
+                disabled   INTEGER DEFAULT 0,
+                updated_at TEXT
+            );
+            CREATE TABLE IF NOT EXISTS logs (
+                id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                chat_id    INTEGER,
+                chat_title TEXT,
+                item_id    TEXT,
+                company    TEXT,
+                created_at TEXT
+            );
+            """)
+        log.info(f"Veritabanı hazır: {DB_PATH}")
+    except Exception as e:
+        log.error(f"Veritabanı başlatılamadı: {e}")
+        # Dizinin varlığını tekrar kontrol et
+        if not os.path.exists(DATA_DIR):
+            os.makedirs(DATA_DIR, exist_ok=True)
+            init_db()
+
 init_db()
 
 # ------------ HELPERS ------------
@@ -66,7 +76,7 @@ def is_admin(user) -> bool:
     return (user and (user.username or "").lower() == ADMIN_USERNAME.lower())
 
 def chat_kind(chat: Chat) -> str:
-    return chat.type  # "private", "group", "supergroup", "channel"
+    return chat.type
 
 def today_range_iso(tz: Optional[dt.tzinfo]=None):
     now = dt.datetime.now(tz)
@@ -109,60 +119,6 @@ def log_create(con: sqlite3.Connection, chat_id: int, chat_title: str, item_id: 
         VALUES (?,?,?,?,?)
     """, (chat_id, chat_title, item_id, company or "", dt.datetime.utcnow().isoformat()))
 
-# ---- URL SHORTENER (CleanURI → is.gd → TinyURL sırayla dener) ----
-def _shorten_cleanuri(url: str, timeout: int = 8) -> Optional[str]:
-    try:
-        r = requests.post("https://cleanuri.com/api/v1/shorten", data={"url": url}, timeout=timeout)
-        if r.ok:
-            j = r.json()
-            s = (j or {}).get("result_url")
-            if isinstance(s, str) and s.startswith("http"):
-                return s.strip()
-    except Exception:
-        log.debug("cleanuri fail", exc_info=True)
-    return None
-
-def _shorten_isgd(url: str, timeout: int = 8) -> Optional[str]:
-    try:
-        r = requests.get("https://is.gd/create.php", params={"format":"simple","url":url}, timeout=timeout)
-        if r.ok:
-            s = r.text.strip()
-            if s.startswith("http"):
-                return s
-    except Exception:
-        log.debug("is.gd fail", exc_info=True)
-    return None
-
-def _shorten_tinyurl(url: str, timeout: int = 8) -> Optional[str]:
-    try:
-        r = requests.get("https://tinyurl.com/api-create.php", params={"url": url}, timeout=timeout)
-        if r.ok:
-            s = r.text.strip()
-            if s.startswith("http"):
-                return s
-    except Exception:
-        log.debug("tinyurl fail", exc_info=True)
-    return None
-
-SHORTENER_FUNCS = {
-    "cleanuri": _shorten_cleanuri,
-    "isgd": _shorten_isgd,
-    "is.gd": _shorten_isgd,
-    "tinyurl": _shorten_tinyurl,
-}
-
-def shorten_url(original_url: str) -> str:
-    if not original_url or not isinstance(original_url, str):
-        return original_url
-    for name in SHORTENER_ORDER:
-        fn = SHORTENER_FUNCS.get(name)
-        if not fn:
-            continue
-        short = fn(original_url)
-        if short:
-            return short
-    return original_url  # hepsi patlarsa orijinali dön
-
 # ------------ COMMANDS ------------
 async def start(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     if chat_kind(update.effective_chat) == "private":
@@ -177,7 +133,6 @@ async def dm_guard(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     if chat_kind(update.effective_chat) == "private":
         await update.message.reply_text("Lütfen @CengizzAtay ile iletişime geçin.")
 
-# /kargo tek mesajda 4 satır
 async def kargo(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     if chat_kind(chat) == "private":
@@ -190,25 +145,13 @@ async def kargo(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Format:\n/kargo\nAd Soyad\nAdres\nTarih\nFirma Adı")
         return
 
-    # eta -> eta_str olarak değiştirdim, çünkü orijinal string'e ihtiyacımız var
     full_name, address, eta_str, company = lines[0], lines[1], lines[2], lines[3]
-
-    # Tarihi API'ye göndermeden önce parse et ve ISO formatına (YYYY-MM-DD) çevir
-    # Bu, DD.MM.YYYY ve MM.DD.YYYY karışıklığını önler.
-    api_eta = eta_str  # Başarısız olursa varsayılan olarak orijinal string'i kullan
+    api_eta = eta_str
     try:
-        # Kullanıcının girdiği tarihi (hem . hem de / ayıracına izin vererek) parse et
-        # Format: DD.MM.YYYY
         parsed_date = dt.datetime.strptime(eta_str.replace("/", "."), "%d.%m.%Y")
-        
-        # API için net, uluslararası YYYY-MM-DD formatına çevir
         api_eta = parsed_date.strftime("%Y-%m-%d")
-        log.info(f"Tarih formatı dönüştürüldü: '{eta_str}' -> '{api_eta}'")
     except ValueError:
-        # Eğer format "DD.MM.YYYY" değilse (örn: "yarın" yazdıysa veya format bozuksa),
-        # orijinal string'i (eta_str) göndermeyi dene.
-        log.warning(f"ETA tarihi parse edilemedi: {eta_str}. Orijinal değer gönderiliyor.")
-        api_eta = eta_str # Zaten eta_str idi, sadece emin olmak için.
+        pass
 
     with db() as con:
         upsert_group(con, chat.id, chat.title or str(chat.id))
@@ -220,12 +163,11 @@ async def kargo(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("Hakkınız yoktur. Lütfen @CengizzAtay yaz.")
             return
 
-    # API'ye gönder
     try:
         payload = {
             "full_name": full_name,
             "address": address,
-            "eta": api_eta,  # <-- Düzeltilmiş, net formatı (api_eta) gönder
+            "eta": api_eta,
             "company": company,
             "carrier": "yurtici"
         }
@@ -236,30 +178,22 @@ async def kargo(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
             timeout=15
         )
         if r.status_code != 200:
-            log.error("API error %s %s", r.status_code, r.text)
             await update.message.reply_text("Sunucuya ulaşılamadı veya hata oluştu.")
             return
         data = r.json()
     except Exception:
-        log.exception("API call failed")
         await update.message.reply_text("Sunucuya ulaşılamadı veya hata oluştu.")
         return
 
-    # kota düş, log at, kalan hak
     with db() as con:
         dec_quota(con, chat.id)
         log_create(con, chat.id, chat.title or str(chat.id), data.get("id",""), company)
         left = con.execute("SELECT quota FROM groups WHERE chat_id=?", (chat.id,)).fetchone()["quota"]
 
-    # --- DÜZELTME: LİNK KISALTICI KALDIRILDI ---
     url = data.get("url", f"{API_BASE}/t/{data.get('id','')}")
-    # short = shorten_url(url) # <-- Kısaltıcı devre dışı
-    # shown_url = short or url # <-- Kısaltıcı devre dışı
-    shown_url = url # <-- Orijinal URL kullanılıyor
+    shown_url = url
     track_id = data.get("id","")
-    # --- DÜZELTME SONU ---
 
-    # İstenen formatta (tırnaksız) mesaj — orijinal URL kullanılır
     msg = (
         "Kargo Takip Sitesi hazır:\n\n"
         f"{shown_url}\n\n"
@@ -269,12 +203,10 @@ async def kargo(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         f"Kargo Takip Numarası : {track_id}\n"
         "Kargo Takip Sitesi : \n"
         f"{shown_url}\n"
-        # Burası zaten senin istediğin gibi (GG.AA.YYYY) formatını gösteriyor
-        f"Tahmini Teslim Süresi : {eta_str}" 
+        f"Tahmini Teslim Süresi : {eta_str}"
     )
     await update.message.reply_text(msg)
 
-# /kalanhak — grubun kalan hakkını göster
 async def kalanhak(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     if chat_kind(chat) == "private":
@@ -286,11 +218,9 @@ async def kalanhak(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     status = "Kapalı" if g["disabled"] else "Açık"
     await update.message.reply_text(f"Grup: {g['title']}\nDurum: {status}\nKalan Hak: {g['quota']}")
 
-# /hakver <sayi>  (sadece admin)
 async def hakver(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    if not is_admin(user):
-        return
+    if not is_admin(user): return
     chat = update.effective_chat
     args = (update.message.text or "").strip().split()
     if len(args) != 2 or not args[1].isdigit():
@@ -301,21 +231,17 @@ async def hakver(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         set_quota(con, chat.id, chat.title or str(chat.id), quota)
     await update.message.reply_text(f"Bu gruba {quota} hak verildi.")
 
-# /bitir (sadece admin)
 async def bitir(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    if not is_admin(user):
-        return
+    if not is_admin(user): return
     chat = update.effective_chat
     with db() as con:
         set_disabled(con, chat.id, chat.title or str(chat.id), True)
     await update.message.reply_text("Bu grup için işlemler kapatıldı.")
 
-# /rapor (sadece admin)
 async def rapor(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    if not is_admin(user):
-        return
+    if not is_admin(user): return
     start_iso, end_iso = today_range_iso()
     with db() as con:
         rows = con.execute("""
@@ -346,14 +272,13 @@ async def rapor(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
             current_chat = r["chat_id"]
             parts.append(f"\n *{r['chat_title']}* — Toplam: *{tmap.get(current_chat,0)}*")
         comp = r["company"] or "—"
-        parts.append(f"   • {comp}: *{r['cnt']}*")
+        parts.append(f"    • {comp}: *{r['cnt']}*")
 
     await update.message.reply_markdown_v2(
         "*Günlük Rapor*\n" + "\n".join(parts)
             .replace("-", "\\-").replace(".", "\\.")
     )
 
-# ------------ FALLBACKS ------------
 async def unknown_dm(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     if chat_kind(update.effective_chat) == "private":
         await update.message.reply_text("Lütfen @CengizzAtay ile iletişime geçin.")
@@ -369,7 +294,6 @@ def main():
     app.add_handler(CommandHandler("bitir", bitir))
     app.add_handler(CommandHandler("rapor", rapor))
 
-    # DM: özelde yazılan her şeye cevap
     app.add_handler(MessageHandler(filters.ChatType.PRIVATE & ~filters.COMMAND, dm_guard))
     app.add_handler(MessageHandler(filters.ChatType.PRIVATE & filters.COMMAND, dm_guard))
     app.add_handler(MessageHandler(filters.ChatType.PRIVATE, unknown_dm))
