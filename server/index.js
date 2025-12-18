@@ -3,7 +3,7 @@ require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') }
 const express = require('express');
 const path = require('path');
 const crypto = require('crypto');
-const sqlite3 = require('sqlite3').verbose();
+const Database = require('better-sqlite3'); // sqlite3 yerine better-sqlite3
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,9 +22,11 @@ app.use((req, _res, next) => {
 
 // ---------- DB init + migrasyonlar ----------
 const dbPath = path.join(__dirname, 'db.sqlite');
-const db = new sqlite3.Database(dbPath);
-db.serialize(() => {
-  db.run(`CREATE TABLE IF NOT EXISTS trackings (
+// better-sqlite3 senkron çalışır, bu yüzden daha hızlı ve kurulumu kolaydır
+const db = new Database(dbPath, { verbose: console.log });
+
+// Tabloyu oluştur
+db.exec(`CREATE TABLE IF NOT EXISTS trackings (
     id TEXT PRIMARY KEY,
     full_name TEXT NOT NULL,
     address TEXT NOT NULL,
@@ -32,19 +34,25 @@ db.serialize(() => {
     company TEXT,
     carrier TEXT,
     status TEXT DEFAULT 'Hazırlandı',
-    next_auto_status_at TEXT,        -- otomatik terfi zamanı (ISO)
+    next_auto_status_at TEXT,
     created_at TEXT DEFAULT (datetime('now'))
   )`);
 
-  // Kolonlar yoksa eklemeye çalış; varsa sessizce geç
-  db.run("ALTER TABLE trackings ADD COLUMN company TEXT", function(){});
-  db.run("ALTER TABLE trackings ADD COLUMN carrier TEXT", function(){});
-  db.run("ALTER TABLE trackings ADD COLUMN next_auto_status_at TEXT", function(){});
-});
+// Kolon kontrolü ve ekleme (better-sqlite3 ile hata yönetimi)
+const addColumn = (colName, colType) => {
+  try {
+    db.exec(`ALTER TABLE trackings ADD COLUMN ${colName} ${colType}`);
+  } catch (e) {
+    // Kolon zaten varsa hata verir, sessizce geçiyoruz
+  }
+};
+
+addColumn('company', 'TEXT');
+addColumn('carrier', 'TEXT');
+addColumn('next_auto_status_at', 'TEXT');
 
 // ---------- yardımcılar ----------
 function computeTomorrow08LocalISO() {
-  // Sunucunun YEREL saatine göre ertesi gün 08:00
   const d = new Date();
   d.setDate(d.getDate() + 1);
   d.setHours(8, 0, 0, 0);
@@ -67,34 +75,30 @@ app.post('/api/tracking', (req, res) => {
     }
 
     const id = crypto.randomBytes(6).toString('hex');
-    const nextAuto = computeTomorrow08LocalISO(); // ertesi gün 08:00
+    const nextAuto = computeTomorrow08LocalISO();
 
-    const q = `INSERT INTO trackings
+    const stmt = db.prepare(`INSERT INTO trackings
       (id, full_name, address, eta, company, carrier, status, next_auto_status_at)
-      VALUES (?,?,?,?,?,?, 'Hazırlandı', ?)`;
+      VALUES (?, ?, ?, ?, ?, ?, 'Hazırlandı', ?)`);
 
-    db.run(q, [id, full_name, address, eta, company || null, carrier || null, nextAuto], function (err) {
-      if (err) {
-        console.error('DB insert error', err);
-        return res.status(500).json({ error: 'db_error' });
-      }
-      res.json({ id, url: `${BASE_URL}/t/${id}` });
-    });
+    stmt.run(id, full_name, address, eta, company || null, carrier || null, nextAuto);
+    
+    res.json({ id, url: `${BASE_URL}/t/${id}` });
   } catch (e) {
-    console.error(e);
+    console.error('Create error:', e);
     res.status(500).json({ error: 'server_error' });
   }
 });
 
 // ---------- public page ----------
 app.get('/t/:id', (req, res) => {
-  db.get('SELECT * FROM trackings WHERE id = ?', [req.params.id], (err, row) => {
-    if (err) return res.status(500).send('DB error');
+  try {
+    const row = db.prepare('SELECT * FROM trackings WHERE id = ?').get(req.params.id);
+    
     if (!row) return res.status(404).send('Takip bulunamadı');
 
     const steps = ['Hazırlandı','Yola çıktı','Dağıtımda','Teslim edildi'];
     const idx = Math.max(0, steps.indexOf(row.status));
-    // Hazırlandıysa çizgi ilk noktaya kadar (~%12), sonrasında orantılı
     const fillPercent = idx === 0 ? 12 : Math.round((idx / (steps.length - 1)) * 100);
 
     res.render('tracking', {
@@ -104,7 +108,9 @@ app.get('/t/:id', (req, res) => {
       activeIndex: idx,
       fillPercent
     });
-  });
+  } catch (e) {
+    res.status(500).send('DB error');
+  }
 });
 
 // ---------- admin json (opsiyonel) ----------
@@ -113,33 +119,38 @@ app.get('/admin/json', (req, res) => {
   const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
   if (!token || token !== API_TOKEN) return res.status(401).json({ error: 'Unauthorized' });
 
-  db.all('SELECT * FROM trackings ORDER BY created_at DESC', [], (err, rows) => {
-    if (err) return res.status(500).json({ error: 'db_error' });
+  try {
+    const rows = db.prepare('SELECT * FROM trackings ORDER BY created_at DESC').all();
     res.json(rows);
-  });
+  } catch (e) {
+    res.status(500).json({ error: 'db_error' });
+  }
 });
 
 // ---------- otomatik durum terfi motoru ----------
 function runAutoAdvanceTick() {
   const nowIso = new Date().toISOString();
 
-  // 1) Hazırlandı → Yola çıktı (vakti gelenler)
-  const sql = `
-    UPDATE trackings
-    SET status = 'Yola çıktı',
-        next_auto_status_at = NULL
-    WHERE status = 'Hazırlandı'
-      AND next_auto_status_at IS NOT NULL
-      AND next_auto_status_at <= ?`;
-  db.run(sql, [nowIso], function (err) {
-    if (err) return console.error('auto-advance error:', err.message);
-    if (this.changes) console.log(`auto-advance: ${this.changes} kayıt 'Yola çıktı' yapıldı`);
-  });
+  try {
+    const stmt = db.prepare(`
+      UPDATE trackings
+      SET status = 'Yola çıktı',
+          next_auto_status_at = NULL
+      WHERE status = 'Hazırlandı'
+        AND next_auto_status_at IS NOT NULL
+        AND next_auto_status_at <= ?`);
+    
+    const info = stmt.run(nowIso);
+    if (info.changes) {
+      console.log(`auto-advance: ${info.changes} kayıt 'Yola çıktı' yapıldı`);
+    }
+  } catch (err) {
+    console.error('auto-advance error:', err.message);
+  }
 }
 
-// Her 60 sn’de bir kontrol
+// Periyodik kontrol
 setInterval(runAutoAdvanceTick, 60 * 1000);
-// Sunucu açılır açılmaz bir kez çalıştır
 runAutoAdvanceTick();
 
 app.listen(PORT, () => console.log(`Server up on ${BASE_URL}`));
