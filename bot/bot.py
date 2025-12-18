@@ -16,7 +16,6 @@ API_BASE       = os.environ.get("API_BASE", "http://localhost:3000")
 API_TOKEN      = os.environ.get("API_TOKEN", "change-me")
 ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "CengizzAtay").lstrip("@")
 
-# URL kısaltıcı sırası (virgülle ayır: cleanuri,isgd,tinyurl)
 SHORTENER_ORDER = [
     s.strip().lower() for s in os.environ.get("SHORTENER_ORDER", "cleanuri,isgd,tinyurl").split(",")
     if s.strip()
@@ -29,14 +28,14 @@ if not BOT_TOKEN:
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
 log = logging.getLogger("kargo-bot")
 
-# ------------ DB (GÜNCELLENDİ) ------------
-# Render'da "unable to open database file" hatasını önlemek için tam yol kullanıyoruz.
+# ------------ DB (ÇÖZÜM BURADA) ------------
+# Hata veren '/var/data' gibi yetki gerektiren yollardan kaçınmak için
+# her zaman botun kendi klasörünü kullanıyoruz.
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.environ.get("DATA_DIR", BASE_DIR)
-DB_PATH = os.path.join(DATA_DIR, "bot_state.sqlite")
+DB_PATH = os.path.join(BASE_DIR, "bot_state.sqlite")
 
 def db() -> sqlite3.Connection:
-    # check_same_thread=False: Bot asenkron olduğu için SQLite çökmesini önler.
+    # check_same_thread=False asenkron bot için şart
     con = sqlite3.connect(DB_PATH, check_same_thread=False)
     con.row_factory = sqlite3.Row
     return con
@@ -61,14 +60,12 @@ def init_db():
                 created_at TEXT
             );
             """)
-        log.info(f"Veritabanı hazır: {DB_PATH}")
+        log.info(f"Veritabanı başarıyla bağlandı: {DB_PATH}")
     except Exception as e:
-        log.error(f"Veritabanı başlatılamadı: {e}")
-        # Dizinin varlığını tekrar kontrol et
-        if not os.path.exists(DATA_DIR):
-            os.makedirs(DATA_DIR, exist_ok=True)
-            init_db()
+        log.error(f"Kritik DB hatası: {e}")
+        raise e
 
+# Bot ayağa kalkmadan önce DB'yi hazırla
 init_db()
 
 # ------------ HELPERS ------------
