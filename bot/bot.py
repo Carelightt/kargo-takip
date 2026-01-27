@@ -1,7 +1,8 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-import os, sqlite3, logging, datetime as dt, requests
+import os, sqlite3, logging, datetime as dt, requests, threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
 from typing import Optional
 
@@ -9,6 +10,23 @@ from telegram import Update, Chat
 from telegram.ext import (
     Application, CommandHandler, MessageHandler, ContextTypes, filters
 )
+
+# ------------ RENDER İÇİN DUMMY WEB SERVER (EKLENDİ) ------------
+# Render Web Service bir port dinlemek zorundadır.
+# Bu basit sunucu Render'ı kandırıp uygulamanın "canlı" olduğunu söyler.
+
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        self.wfile.write(b"Bot calisiyor! (Kargo Bot)")
+
+def start_keep_alive():
+    port = int(os.environ.get("PORT", 8080))
+    server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
+    print(f"Dummy server {port} portunda baslatildi.")
+    server.serve_forever()
 
 # ------------ ENV ------------
 BOT_TOKEN      = os.environ.get("BOT_TOKEN")
@@ -282,6 +300,12 @@ async def unknown_dm(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
 
 # ------------ MAIN ------------
 def main():
+    # 1. ÖNCE Dummy Web Server'ı ayrı bir thread'de başlatıyoruz.
+    # Bu sayede Render, uygulamanın PORT dinlediğini görüp "Live" işaretliyor.
+    t = threading.Thread(target=start_keep_alive, daemon=True)
+    t.start()
+
+    # 2. Sonra Bot'u başlatıyoruz.
     app = Application.builder().token(BOT_TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
