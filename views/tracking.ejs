@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="tr" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kargo Takip • <%= item.id %></title>
+  <link rel="stylesheet" href="/public/widget.css?v=6" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22></text></svg>">
+</head>
+<body>
+  <div class="bg-grad"></div>
+
+  <main class="card glass">
+    <header class="top">
+      <div class="head-left">
+        <img class="carrier-logo big" src="/public/carriers/yurtici.png" alt="Yurtiçi Kargo" onerror="this.style.display='none'">
+        <% if (item.company) { %>
+          <span class="firm-name"><%= item.company %></span>
+        <% } %>
+        <div class="trk-id">#<%= item.id %></div>
+      </div>
+      <div class="actions">
+        <button id="themeBtn" class="btn ghost" title="Tema Değiştir">🌗</button>
+        <button id="copyBtn" class="btn ghost" title="Linki Kopyala">🔗</button>
+        <button id="shareBtn" class="btn ghost" title="Paylaş">📤</button>
+        <button id="printBtn" class="btn ghost" title="Yazdır">🖨️</button>
+      </div>
+    </header>
+
+    <section class="grid">
+      <div><div class="label">Ad Soyad</div><div class="val"><%= item.full_name %></div></div>
+      <div><div class="label">Adres</div><div class="val"><%= item.address %></div></div>
+      
+      <div><div class="label">Tahmini Varış</div>
+        <div class="val">
+          <% 
+            let formattedDate = item.eta; // Varsayılan: Orijinal tarih
+            try {
+              // Tarih '2025-11-03' formatında mı (yani '-' içeriyor mu) diye kontrol et
+              if (item.eta && item.eta.includes('-')) {
+                const parts = item.eta.split('-');
+                // Formatı YYYY-MM-DD'den GG.AA.YYYY'ye çevir
+                if (parts.length === 3) {
+                  formattedDate = `${parts[2]}.${parts[1]}.${parts[0]}`;
+                }
+              }
+            } catch (e) {
+              // Bir hata olursa, formattedDate zaten orijinal 'item.eta' olarak kalacak.
+            }
+          %>
+          <%= formattedDate %> <span id="etaRel" class="eta-rel"></span>
+        </div>
+      </div>
+      <div><div class="label">Durum</div><div class="badge"><%= item.status %></div></div>
+    </section>
+
+    <section class="timeline">
+      <div class="line">
+        <div class="line-fill" style="width: <%= fillPercent %>%"></div>
+      </div>
+      <div class="dots">
+        <% steps.forEach(function(step, i){ %>
+          <div class="dot <%= i <= activeIndex ? 'active' : '' %> <%= i === activeIndex ? 'pulse' : '' %>">
+            <div class="dot-inner"><%= i+1 %></div>
+            <div class="dot-label"><%= step %></div>
+          </div>
+        <% }); %>
+      </div>
+    </section>
+
+      <section class="qr-row">
+  <img alt="Takip QR" width="120" height="120"
+       src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=<%= encodeURIComponent(baseUrl + '/t/' + item.id) %>">
+</section>
+
+
+    <div class="ssl-row">
+      <span class="ssl-badge" title="SSL Etkin">🔒 SSL</span>
+      <span class="ssl-badge" title="Güvenli İletişim">🛡️ Güvenli</span>
+    </div>
+
+    <footer class="card-footer">
+      <div class="foot-center">© 2025 Yurtiçi Kargo. Tüm Hakları Saklıdır.</div>
+      <div class="foot-right">
+        <button id="contactBtn" class="btn primary">Kuryeyle İletişime Geç</button>
+      </div>
+    </footer>
+
+
+  </main>
+
+  <script>
+  // Tema switch
+  (function () {
+    const key = 'kt_theme', html = document.documentElement;
+    const saved = localStorage.getItem(key);
+    if (saved) html.setAttribute('data-theme', saved);
+    document.getElementById('themeBtn')?.addEventListener('click', () => {
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem(key, next);
+    });
+  })();
+
+  // Copy / Share / Print
+  (function () {
+    const link = "<%= baseUrl %>/t/<%= item.id %>";
+    const copyBtn  = document.getElementById('copyBtn');
+    const shareBtn = document.getElementById('shareBtn');
+    const printBtn = document.getElementById('printBtn');
+
+    copyBtn?.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(link); alert('Link kopyalandı ✔'); } catch {}
+    });
+
+    shareBtn?.addEventListener('click', async () => {
+      if (navigator.share) {
+        try { await navigator.share({ title: 'Kargo Takip', url: link }); } catch {}
+      } else {
+        alert('Tarayıcı paylaşımı yok');
+      }
+    });
+
+    printBtn?.addEventListener('click', () => window.print());
+  })();
+
+  // ETA relative
+  (function () {
+    const t = "<%= (item.eta||'').replace(/\"/g,'') %>";
+    const sp = document.getElementById('etaRel');
+    const d = Date.parse(t);
+    if (!isNaN(d)) {
+      const days = Math.round((d - Date.now()) / 86400000);
+      sp.textContent = days >= 0 ? `(${days} gün kaldı)` : `(${Math.abs(days)} gün gecikti)`;
+    }
+  })();
+
+  // Kuryeyle iletişim butonu
+  (function () {
+    const status = "<%= item.status %>";
+    const btn = document.getElementById('contactBtn');
+    btn?.addEventListener('click', () => {
+      if (status !== "Dağıtımda") {
+        alert("Lütfen kargonuzun dağıtıma çıkmasını bekleyin.");
+        return;
+      }
+      alert("Kurye ekiplerine bildirildi. Kısa süre içinde dönüş yapılacaktır.");
+    });
+  })();
+
+  // Sağ tık menüsü engel
+  document.addEventListener('contextmenu', e => e.preventDefault());
+
+  // F12, Ctrl+Shift+I/J, Ctrl+U engel
+  document.addEventListener('keydown', e => {
+    if (e.key === "F12") { e.preventDefault(); return false; }
+    if ((e.ctrlKey && e.shiftKey && (/^[ij]$/i).test(e.key)) || (e.ctrlKey && (e.key === 'U' || e.key === 'u'))) {
+      e.preventDefault(); return false;
+    }
+  });
+</script>
+
+</body>
+</html>
