@@ -1,4 +1,4 @@
-// server/index.js - GÜNCELLENMİŞ VERSİYON
+// server/index.js - GÜNCELLENMİŞ VERSİYON (MANUEL EKLEME ÖZELLİKLİ)
 require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 const express = require('express');
 const path = require('path');
@@ -9,20 +9,19 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 const API_TOKEN = process.env.API_TOKEN || 'change-me';
-// Admin paneline giriş için basit şifre (bunu değiştirebilirsin)
+// Admin şifren burada (bunu değiştirebilirsin)
 const ADMIN_SECRET = '123456'; 
 
 app.use(express.json());
-// Form verilerini okumak için gerekli (Admin paneli için)
-app.use(express.urlencoded({ extended: true })); 
+app.use(express.urlencoded({ extended: true })); // Form verilerini okumak için
 
 app.use('/public', express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// DB Ayarları
+// DB Başlatma
 const dbPath = path.join(__dirname, 'db.sqlite');
-const db = new Database(dbPath); // verbose kapalı
+const db = new Database(dbPath);
 
 db.exec(`CREATE TABLE IF NOT EXISTS trackings (
     id TEXT PRIMARY KEY,
@@ -36,7 +35,7 @@ db.exec(`CREATE TABLE IF NOT EXISTS trackings (
     created_at TEXT DEFAULT (datetime('now'))
   )`);
 
-// --- ROUTE: ANASAYFA (Kargo Sorgulama) ---
+// --- ROUTE: ANASAYFA ---
 app.get('/', (req, res) => {
     res.send(`
     <!DOCTYPE html>
@@ -66,22 +65,48 @@ app.get('/', (req, res) => {
                 var val = document.getElementById("takipNo").value.trim();
                 if(val) window.location.href = "/t/" + val;
             }
+            // Enter tuşu desteği
+            document.getElementById("takipNo").addEventListener("keypress", function(event) {
+                if (event.key === "Enter") git();
+            });
         </script>
     </body>
     </html>
     `);
 });
 
-// --- ROUTE: ADMIN PANELİ (YENİ) ---
+// --- ROUTE: ADMIN PANELİ GÖRÜNTÜLEME ---
 app.get('/admin', (req, res) => {
-    // URL sonuna ?secret=123456 yazmazsan açılmaz
-    if (req.query.secret !== ADMIN_SECRET) return res.status(403).send("Giriş Yasak");
+    if (req.query.secret !== ADMIN_SECRET) return res.status(403).send("Giriş Yasak: URL sonuna ?secret=ŞİFRE eklemeyi unuttunuz.");
 
     const trackings = db.prepare('SELECT * FROM trackings ORDER BY created_at DESC').all();
-    res.render('admin', { items: trackings, secret: ADMIN_SECRET });
+    res.render('admin', { items: trackings, secret: ADMIN_SECRET, error: null });
 });
 
-// --- ROUTE: ADMIN GÜNCELLEME (YENİ) ---
+// --- ROUTE: ADMIN YENİ KARGO EKLEME (MANUEL) ---
+app.post('/admin/create', (req, res) => {
+    const { id, full_name, address, eta, secret } = req.body;
+    
+    // Güvenlik Kontrolü
+    if (secret !== ADMIN_SECRET) return res.status(403).send("Yetkisiz işlem");
+
+    try {
+        // ID boşsa otomatik oluştur, doluysa onu kullan
+        const trackingId = id && id.trim() !== '' ? id.trim() : crypto.randomBytes(6).toString('hex');
+        const insertEta = eta || new Date().toISOString().split('T')[0];
+
+        const stmt = db.prepare(`INSERT INTO trackings (id, full_name, address, eta, status) VALUES (?, ?, ?, ?, 'Hazırlandı')`);
+        stmt.run(trackingId, full_name, address, insertEta);
+        
+        // Başarılıysa admin paneline geri dön
+        res.redirect('/admin?secret=' + secret);
+    } catch (e) {
+        // Hata varsa (örn: aynı ID kullanıldıysa)
+        res.send(`<h1>Hata Oluştu</h1><p>${e.message}</p><a href="/admin?secret=${secret}">Geri Dön</a>`);
+    }
+});
+
+// --- ROUTE: ADMIN GÜNCELLEME ---
 app.post('/admin/update', (req, res) => {
     const { id, status, eta, secret } = req.body;
     
@@ -96,21 +121,29 @@ app.post('/admin/update', (req, res) => {
     }
 });
 
-// --- ROUTE: KARGO OLUŞTURMA (API) ---
+// --- ROUTE: ADMIN SİLME (OPSİYONEL) ---
+app.post('/admin/delete', (req, res) => {
+    const { id, secret } = req.body;
+    if (secret !== ADMIN_SECRET) return res.status(403).send("Yetkisiz işlem");
+    try {
+        db.prepare('DELETE FROM trackings WHERE id = ?').run(id);
+        res.redirect('/admin?secret=' + secret);
+    } catch(e) { res.send(e.message); }
+});
+
+// --- ROUTE: API (BOT İÇİN) ---
 app.post('/api/tracking', (req, res) => {
   try {
     const auth = req.headers['authorization'] || '';
     const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
     if (!token || token !== API_TOKEN) return res.status(401).json({ error: 'Unauthorized' });
 
-    const { full_name, address, eta, company, carrier } = req.body || {};
+    const { full_name, address, eta } = req.body || {};
     const id = crypto.randomBytes(6).toString('hex');
-    
-    // Varsayılan olarak bugünün tarihi
     const insertEta = eta || new Date().toISOString().split('T')[0];
 
-    const stmt = db.prepare(`INSERT INTO trackings (id, full_name, address, eta, company, carrier, status) VALUES (?, ?, ?, ?, ?, ?, 'Hazırlandı')`);
-    stmt.run(id, full_name, address, insertEta, company || null, carrier || null);
+    const stmt = db.prepare(`INSERT INTO trackings (id, full_name, address, eta, status) VALUES (?, ?, ?, ?, 'Hazırlandı')`);
+    stmt.run(id, full_name, address, insertEta);
     
     res.json({ id, url: `${BASE_URL}/t/${id}` });
   } catch (e) {
@@ -122,7 +155,10 @@ app.post('/api/tracking', (req, res) => {
 app.get('/t/:id', (req, res) => {
   try {
     const row = db.prepare('SELECT * FROM trackings WHERE id = ?').get(req.params.id);
-    if (!row) return res.status(404).send('Takip bulunamadı');
+    if (!row) return res.status(404).send(`
+        <h2 style="text-align:center; margin-top:50px;">Takip Bulunamadı</h2>
+        <p style="text-align:center;">Aradığınız <b>${req.params.id}</b> numaralı kargo sistemde kayıtlı değil.</p>
+    `);
 
     const steps = ['Hazırlandı','Yola çıktı','Dağıtımda','Teslim edildi'];
     const idx = Math.max(0, steps.indexOf(row.status));
@@ -140,4 +176,4 @@ app.get('/t/:id', (req, res) => {
   }
 });
 
-app.listen(PORT, () => console.log(`Server aktif: ${BASE_URL}`));
+app.listen(PORT, () =>
