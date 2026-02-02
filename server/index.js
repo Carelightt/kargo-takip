@@ -11,7 +11,13 @@ const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 const API_TOKEN = process.env.API_TOKEN || 'change-me';
 
 app.use(express.json());
+
+// MEVCUT: Public klasörü (CSS/JS vs için)
 app.use('/public', express.static(path.join(__dirname, 'public')));
+
+// YENİ EKLENDİ: arkaplan.jpg gibi dosyaların kök dizinden (/arkaplan.jpg) çalışması için:
+app.use(express.static(path.join(__dirname, 'public')));
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
@@ -61,6 +67,124 @@ function computeTomorrow08LocalISO() {
 
 // ---------- health ----------
 app.get('/health', (_req, res) => res.json({ ok: true }));
+
+// ---------- YENİ EKLENEN ANASAYFA (SORGULAMA EKRANI) ----------
+app.get('/', (req, res) => {
+    res.send(`
+    <!DOCTYPE html>
+    <html lang="tr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Kargo Takip</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+            
+            body {
+                /* Public klasöründeki arkaplan.jpg dosyasını çeker */
+                background: url('/arkaplan.jpg') no-repeat center center fixed; 
+                background-size: cover;
+                height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .card {
+                background: rgba(255, 255, 255, 0.95);
+                padding: 40px;
+                border-radius: 15px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+                width: 90%;
+                max-width: 450px;
+                text-align: center;
+                border-top: 5px solid #1e4a9e; /* Mavi Çizgi */
+                animation: slideIn 1s ease-out;
+            }
+
+            h2 {
+                color: #1e4a9e;
+                margin-bottom: 25px;
+                font-size: 22px;
+                font-weight: 600;
+            }
+
+            .input-group {
+                margin-bottom: 20px;
+            }
+
+            input {
+                width: 100%;
+                padding: 15px;
+                border: 2px solid #ddd;
+                border-radius: 8px;
+                font-size: 16px;
+                outline: none;
+                transition: 0.3s;
+            }
+
+            input:focus {
+                border-color: #ff7f00; /* Turuncu */
+                box-shadow: 0 0 8px rgba(255, 127, 0, 0.2);
+            }
+
+            button {
+                width: 100%;
+                padding: 15px;
+                background: #ff7f00; /* Turuncu */
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 18px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: 0.3s;
+            }
+
+            button:hover {
+                background: #e66900;
+                transform: translateY(-2px);
+            }
+
+            @keyframes slideIn {
+                from { transform: translateY(-50px); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
+            }
+        </style>
+    </head>
+    <body>
+
+        <div class="card">
+            <h2>Lütfen Kargo Takip Numaranızı Giriniz :</h2>
+            <div class="input-group">
+                <input type="text" id="takipNo" placeholder="Takip numarasını buraya yazınız...">
+            </div>
+            <button onclick="sorgula()">SORGULA</button>
+        </div>
+
+        <script>
+            function sorgula() {
+                var no = document.getElementById("takipNo").value;
+                if(no.trim() !== "") {
+                    // Girilen numarayı /t/ID adresine yönlendirir
+                    window.location.href = "/t/" + no.trim();
+                } else {
+                    alert("Lütfen geçerli bir numara giriniz.");
+                }
+            }
+
+            // Enter tuşu desteği
+            document.getElementById("takipNo").addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    sorgula();
+                }
+            });
+        </script>
+
+    </body>
+    </html>
+    `);
+});
 
 // ---------- create tracking (korumalı) ----------
 app.post('/api/tracking', (req, res) => {
