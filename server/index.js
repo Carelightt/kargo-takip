@@ -18,6 +18,13 @@ app.use(express.urlencoded({ extended: true })); // Form verilerini okumak için
 app.use('/public', express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+// '..' ekleyerek bir üst klasöre çıkıp public'i bulmasını sağlıyoruz
+app.use('/public', express.static(path.join(__dirname, '..', 'public')));
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
+app.set('view engine', 'ejs');
+// views klasörü de bir üstteyse:
+app.set('views', path.join(__dirname, '..', 'views'));
 
 // Veritabanı Başlatma
 const dbPath = path.join(__dirname, 'db.sqlite');
