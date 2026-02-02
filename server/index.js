@@ -1,4 +1,4 @@
-// server/index.js - GARANTİ ÇALIŞAN FİNAL VERSİYON
+// server/index.js - DÜZELTİLMİŞ PATH AYARLARIYLA
 require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 const express = require('express');
 const path = require('path');
@@ -10,21 +10,26 @@ const PORT = process.env.PORT || 3000;
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 const API_TOKEN = process.env.API_TOKEN || 'change-me';
 
-// Admin Panel Şifren
+// Admin Şifren
 const ADMIN_SECRET = 'f081366a24e2'; 
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// --- KLASÖR AYARLARI (En Kritik Kısım) ---
-// Dosyaları server klasörünün içine taşıdığını varsayıyoruz:
-app.use('/public', express.static(path.join(__dirname, 'public')));
-app.use(express.static(path.join(__dirname, 'public'))); // Kök dizinden erişim için
+// --- KRİTİK DÜZELTME BURADA ---
+// __dirname = server klasörü demektir.
+// '../views' diyerek server'dan çıkıp ana dizindeki views'e gidiyoruz.
 
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+// DÜZELTME: views klasörü bir üst dizinde
+app.set('views', path.join(__dirname, '../views'));
 
-// Veritabanı Başlatma
+// DÜZELTME: public klasörü de bir üst dizinde
+app.use('/public', express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, '../public'))); 
+
+
+// Veritabanı Başlatma (DB dosyasını server klasörü içine oluşturur)
 const dbPath = path.join(__dirname, 'db.sqlite');
 const db = new Database(dbPath);
 
@@ -47,7 +52,6 @@ app.get('/', (req, res) => {
     <html lang="tr">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Kargo Takip</title>
         <style>
             * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
@@ -86,17 +90,10 @@ app.get('/admin', (req, res) => {
             return res.status(403).send("Giriş Yasak: URL sonuna ?secret=ŞİFRE eklemeyi unuttunuz.");
         }
         const trackings = db.prepare('SELECT * FROM trackings ORDER BY created_at DESC').all();
+        // admin.ejs dosyasını render et
         res.render('admin', { items: trackings, secret: ADMIN_SECRET });
     } catch (error) {
-        // Hata olursa tarayıcıya hatayı basıyoruz ki ne olduğunu görelim
-        res.status(500).send(`
-            <h1>Sistem Hatası (500)</h1>
-            <p>Admin paneli açılırken bir sorun oldu.</p>
-            <p><b>Hata Detayı:</b> ${error.message}</p>
-            <hr>
-            <h3>Muhtemel Çözüm:</h3>
-            <p>Eğer hata <i>"Failed to lookup view"</i> diyorsa, <b>views</b> klasörünü <b>server</b> klasörünün içine taşımamışsın demektir.</p>
-        `);
+        res.status(500).send(`<h1>Hata</h1><p>${error.message}</p>`);
     }
 });
 
