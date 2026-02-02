@@ -1,4 +1,4 @@
-// server/index.js - TAM VE DÜZELTİLMİŞ VERSİYON
+// server/index.js - GARANTİ ÇALIŞAN FİNAL VERSİYON
 require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 const express = require('express');
 const path = require('path');
@@ -9,28 +9,25 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 const API_TOKEN = process.env.API_TOKEN || 'change-me';
-// Admin panel şifresi
+
+// Admin Panel Şifren
 const ADMIN_SECRET = 'f081366a24e2'; 
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // Form verilerini okumak için şart
+app.use(express.urlencoded({ extended: true }));
 
+// --- KLASÖR AYARLARI (En Kritik Kısım) ---
+// Dosyaları server klasörünün içine taşıdığını varsayıyoruz:
 app.use('/public', express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'))); // Kök dizinden erişim için
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-// '..' ekleyerek bir üst klasöre çıkıp public'i bulmasını sağlıyoruz
-app.use('/public', express.static(path.join(__dirname, '..', 'public')));
-app.use(express.static(path.join(__dirname, '..', 'public')));
-
-app.set('view engine', 'ejs');
-// views klasörü de bir üstteyse:
-app.set('views', path.join(__dirname, '..', 'views'));
 
 // Veritabanı Başlatma
 const dbPath = path.join(__dirname, 'db.sqlite');
 const db = new Database(dbPath);
 
-// Tablo oluşturma
 db.exec(`CREATE TABLE IF NOT EXISTS trackings (
     id TEXT PRIMARY KEY,
     full_name TEXT NOT NULL,
@@ -43,7 +40,7 @@ db.exec(`CREATE TABLE IF NOT EXISTS trackings (
     created_at TEXT DEFAULT (datetime('now'))
   )`);
 
-// --- ROUTE: ANASAYFA (Sorgulama Ekranı) ---
+// --- ROUTE: ANASAYFA ---
 app.get('/', (req, res) => {
     res.send(`
     <!DOCTYPE html>
@@ -84,16 +81,28 @@ app.get('/', (req, res) => {
 
 // --- ROUTE: ADMIN PANELİ ---
 app.get('/admin', (req, res) => {
-    if (req.query.secret !== ADMIN_SECRET) return res.status(403).send("Giriş Yasak: URL sonuna ?secret=ŞİFRE eklemeyi unuttunuz.");
-
-    const trackings = db.prepare('SELECT * FROM trackings ORDER BY created_at DESC').all();
-    res.render('admin', { items: trackings, secret: ADMIN_SECRET });
+    try {
+        if (req.query.secret !== ADMIN_SECRET) {
+            return res.status(403).send("Giriş Yasak: URL sonuna ?secret=ŞİFRE eklemeyi unuttunuz.");
+        }
+        const trackings = db.prepare('SELECT * FROM trackings ORDER BY created_at DESC').all();
+        res.render('admin', { items: trackings, secret: ADMIN_SECRET });
+    } catch (error) {
+        // Hata olursa tarayıcıya hatayı basıyoruz ki ne olduğunu görelim
+        res.status(500).send(`
+            <h1>Sistem Hatası (500)</h1>
+            <p>Admin paneli açılırken bir sorun oldu.</p>
+            <p><b>Hata Detayı:</b> ${error.message}</p>
+            <hr>
+            <h3>Muhtemel Çözüm:</h3>
+            <p>Eğer hata <i>"Failed to lookup view"</i> diyorsa, <b>views</b> klasörünü <b>server</b> klasörünün içine taşımamışsın demektir.</p>
+        `);
+    }
 });
 
-// --- ROUTE: ADMIN YENİ KARGO EKLEME (MANUEL) ---
+// --- ROUTE: ADMIN YENİ KARGO EKLEME ---
 app.post('/admin/create', (req, res) => {
     const { id, full_name, address, eta, secret } = req.body;
-    
     if (secret !== ADMIN_SECRET) return res.status(403).send("Yetkisiz işlem");
 
     try {
@@ -112,7 +121,6 @@ app.post('/admin/create', (req, res) => {
 // --- ROUTE: ADMIN GÜNCELLEME ---
 app.post('/admin/update', (req, res) => {
     const { id, status, eta, secret } = req.body;
-    
     if (secret !== ADMIN_SECRET) return res.status(403).send("Yetkisiz işlem");
 
     try {
@@ -124,7 +132,7 @@ app.post('/admin/update', (req, res) => {
     }
 });
 
-// --- ROUTE: API (BOT İÇİN) ---
+// --- ROUTE: API ---
 app.post('/api/tracking', (req, res) => {
   try {
     const auth = req.headers['authorization'] || '';
@@ -148,10 +156,7 @@ app.post('/api/tracking', (req, res) => {
 app.get('/t/:id', (req, res) => {
   try {
     const row = db.prepare('SELECT * FROM trackings WHERE id = ?').get(req.params.id);
-    if (!row) return res.status(404).send(`
-        <h2 style="text-align:center; margin-top:50px;">Takip Bulunamadı</h2>
-        <p style="text-align:center;">Aradığınız <b>${req.params.id}</b> numaralı kargo bulunamadı.</p>
-    `);
+    if (!row) return res.status(404).send(`<h3>Takip No Bulunamadı: ${req.params.id}</h3>`);
 
     const steps = ['Hazırlandı','Yola çıktı','Dağıtımda','Teslim edildi'];
     const idx = Math.max(0, steps.indexOf(row.status));
@@ -165,7 +170,7 @@ app.get('/t/:id', (req, res) => {
       fillPercent
     });
   } catch (e) {
-    res.status(500).send('DB error');
+    res.status(500).send(`<h1>Hata Oluştu</h1><p>${e.message}</p>`);
   }
 });
 
