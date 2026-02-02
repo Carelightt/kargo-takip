@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3000;
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 const API_TOKEN = process.env.API_TOKEN || 'change-me';
 // Admin panel şifresi
-const ADMIN_SECRET = '123456'; 
+const ADMIN_SECRET = 'f081366a24e2'; 
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Form verilerini okumak için şart
