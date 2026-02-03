@@ -1,208 +1,344 @@
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yönetim Paneli - GRB Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --neon-pink: #ff00ff;
+            --neon-blue: #00ffff;
+            --neon-green: #39ff14;
+            --neon-purple: #bc13fe;
+            --bg-dark: #050505;
+            --card-bg: rgba(20, 20, 20, 0.9);
+        }
 
-:root{
-  --bg:#050505;
-  --glass:rgba(255,255,255,0.08);
-  --border:rgba(255,255,255,0.15);
-  --text:#eaeaea;
-}
+        body { 
+            font-family: 'Rajdhani', sans-serif; 
+            background-color: var(--bg-dark); 
+            background-image: radial-gradient(circle at 50% 50%, #1a0b2e 0%, #000000 100%);
+            color: #fff; 
+            padding: 20px; 
+            min-height: 100vh;
+        }
 
-*{box-sizing:border-box}
+        /* Işıltılı Animasyon */
+        @keyframes neonPulse {
+            0% { box-shadow: 0 0 5px var(--neon-pink), 0 0 10px var(--neon-pink); }
+            50% { box-shadow: 0 0 20px var(--neon-pink), 0 0 30px var(--neon-pink); }
+            100% { box-shadow: 0 0 5px var(--neon-pink), 0 0 10px var(--neon-pink); }
+        }
 
-body{
-  margin:0;
-  font-family:'Inter',sans-serif;
-  background:
-    linear-gradient(120deg,#000,#050505,#000),
-    radial-gradient(circle at top left,#222,#000);
-  color:var(--text);
-  padding:30px;
-  overflow-x:hidden;
-}
+        .container { max-width: 1100px; margin: 0 auto; }
 
-/* RGB ARKAPLAN AKIŞ */
-body::before{
-  content:"";
-  position:fixed;
-  inset:-50%;
-  background:
-    linear-gradient(90deg,
-      #ff00cc,
-      #3333ff,
-      #00ffe0,
-      #00ff6a,
-      #ffee00,
-      #ff8800,
-      #ff0055,
-      #ff00cc
-    );
-  background-size:600% 600%;
-  animation:rgbFlow 20s linear infinite;
-  opacity:.18;
-  filter:blur(120px);
-  z-index:-1;
-}
+        /* KART TASARIMI - Şeffaf ve Neon Kenarlı */
+        .card { 
+            background: var(--card-bg); 
+            padding: 25px; 
+            border-radius: 15px; 
+            border: 1px solid var(--neon-purple);
+            box-shadow: 0 0 15px rgba(188, 19, 254, 0.3); 
+            margin-bottom: 30px; 
+            backdrop-filter: blur(5px);
+        }
 
-@keyframes rgbFlow{
-  0%{background-position:0% 50%}
-  100%{background-position:100% 50%}
-}
+        /* HEADER KISMI */
+        .header-row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 2px solid var(--neon-blue); 
+            padding-bottom: 15px; 
+            margin-bottom: 20px; 
+        }
 
-.container{
-  max-width:1200px;
-  margin:auto;
-}
+        h1 { 
+            font-family: 'Orbitron', sans-serif; 
+            color: var(--neon-pink); 
+            text-shadow: 0 0 10px var(--neon-pink);
+            margin: 0; 
+            letter-spacing: 2px;
+        }
+        
+        h2 { 
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem; 
+            color: var(--neon-blue); 
+            margin-bottom: 15px; 
+            border-bottom: 1px solid #333; 
+            padding-bottom: 5px; 
+            text-shadow: 0 0 8px var(--neon-blue);
+        }
 
-/* CAM KART */
-.card{
-  background:var(--glass);
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:25px;
-  margin-bottom:30px;
-  backdrop-filter:blur(18px);
-  box-shadow:0 0 40px rgba(0,0,0,.6);
-  transition:.4s;
-}
+        p { color: #ccc; font-size: 1.1rem; }
 
-.card:hover{
-  box-shadow:
-    0 0 25px rgba(0,255,255,.25),
-    0 0 45px rgba(255,0,255,.25);
-}
+        /* BUTONLAR - Parlak ve Degrade */
+        .backup-actions { display: flex; gap: 15px; }
+        
+        .btn-backup { 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 50px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            color: #000; 
+            text-decoration: none; 
+            font-size: 14px; 
+            display: inline-flex; 
+            align-items: center; 
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
 
-/* HEADER */
-.header-row{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:15px;
-  border-bottom:1px solid var(--border);
-  padding-bottom:12px;
-}
+        .btn-download { 
+            background: var(--neon-blue); 
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+        .btn-download:hover { 
+            background: #fff; 
+            box-shadow: 0 0 20px var(--neon-blue); 
+        }
 
-h1{
-  margin:0;
-  font-size:1.7rem;
-  font-weight:800;
-  background:linear-gradient(90deg,#00ffe0,#ff00ff,#00ff6a);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-}
+        .btn-upload { 
+            background: var(--neon-pink); 
+            box-shadow: 0 0 10px var(--neon-pink);
+        }
+        .btn-upload:hover { 
+            background: #fff; 
+            box-shadow: 0 0 20px var(--neon-pink); 
+        }
 
-h2{
-  font-size:1.1rem;
-  margin-bottom:15px;
-  color:#cfcfcf;
-}
+        /* FORM ELEMANLARI */
+        .form-row { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; }
+        .form-group { display: flex; flex-direction: column; }
+        
+        .form-group label { 
+            font-size: 0.9rem; 
+            color: var(--neon-green); 
+            margin-bottom: 5px; 
+            font-weight: bold; 
+            text-shadow: 0 0 5px rgba(57, 255, 20, 0.5);
+        }
 
-/* BUTONLAR */
-.backup-actions{display:flex;gap:12px}
+        input, select { 
+            padding: 12px; 
+            background: #111; 
+            border: 1px solid #444; 
+            color: #fff;
+            border-radius: 5px; 
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+        }
 
-.btn-backup{
-  padding:10px 18px;
-  border-radius:999px;
-  font-weight:700;
-  background:linear-gradient(90deg,#00ffe0,#ff00ff,#00ff6a);
-  color:#000;
-  border:none;
-  cursor:pointer;
-  text-decoration:none;
-  transition:.3s;
-}
+        input:focus, select:focus { 
+            outline: none; 
+            border-color: var(--neon-blue); 
+            box-shadow: 0 0 10px var(--neon-blue); 
+        }
 
-.btn-backup:hover{
-  transform:scale(1.07);
-  box-shadow:0 0 25px rgba(0,255,255,.8);
-}
+        /* Kaydet/Oluştur Butonları */
+        button { 
+            padding: 12px 25px; 
+            background: transparent; 
+            color: var(--neon-green); 
+            border: 2px solid var(--neon-green); 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            text-transform: uppercase;
+            font-family: 'Orbitron', sans-serif;
+            transition: 0.3s;
+        }
+        
+        button:hover { 
+            background: var(--neon-green); 
+            color: #000; 
+            box-shadow: 0 0 20px var(--neon-green); 
+        }
 
-/* FORM */
-.form-row{
-  display:flex;
-  gap:15px;
-  flex-wrap:wrap;
-  align-items:flex-end;
-}
+        button.update-btn { 
+            background: linear-gradient(45deg, #1e4a9e, var(--neon-blue));
+            border: none;
+            color: white;
+            padding: 8px 15px; 
+            font-size: 0.9rem; 
+        }
+        button.update-btn:hover { box-shadow: 0 0 15px var(--neon-blue); }
+        
+        /* TABLO */
+        table { width: 100%; border-collapse: separate; border-spacing: 0 10px; margin-top: 10px; }
+        
+        thead th { 
+            text-align: left; 
+            padding: 15px; 
+            color: var(--neon-blue); 
+            border-bottom: 2px solid var(--neon-blue); 
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
 
-.form-group{
-  display:flex;
-  flex-direction:column;
-}
+        tbody tr { 
+            background: rgba(255, 255, 255, 0.05); 
+            transition: 0.3s; 
+        }
+        
+        tbody tr:hover { 
+            background: rgba(255, 0, 255, 0.1); 
+            transform: scale(1.01);
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.2);
+        }
 
-label{
-  font-size:.75rem;
-  opacity:.7;
-  margin-bottom:4px;
-}
+        td { padding: 15px; border-bottom: 1px solid #333; color: #eee; }
+        
+        .link { 
+            color: var(--neon-pink); 
+            text-decoration: none; 
+            font-weight: bold; 
+            font-size: 1.1rem;
+            text-shadow: 0 0 5px var(--neon-pink);
+        }
 
-input,select{
-  background:rgba(0,0,0,.5);
-  border:1px solid var(--border);
-  color:#fff;
-  padding:10px;
-  border-radius:10px;
-  transition:.3s;
-}
+        /* Placeholder rengi */
+        ::placeholder { color: #555; }
+    </style>
+</head>
+<body>
 
-input:focus,select:focus{
-  outline:none;
-  border-color:#00ffe0;
-  box-shadow:0 0 15px rgba(0,255,255,.6);
-}
+<div class="container">
+    
+    <div class="card" style="animation: neonPulse 3s infinite;">
+        <div class="header-row">
+            <h1>📦 KARGO PAVYON PANEL</h1>
+            <div class="backup-actions">
+                <a href="/admin/backup?secret=<%= secret %>" class="btn-backup btn-download">
+                    💾 İNDİR
+                </a>
 
-button{
-  padding:10px 22px;
-  border-radius:999px;
-  border:none;
-  font-weight:700;
-  cursor:pointer;
-  background:linear-gradient(90deg,#00ffe0,#ff00ff);
-  color:#000;
-  transition:.3s;
-}
+                <button onclick="document.getElementById('fileInput').click()" class="btn-backup btn-upload">
+                    📂 YÜKLE
+                </button>
+                <input type="file" id="fileInput" style="display: none;" accept=".json" onchange="yedekYukle(this)">
+            </div>
+        </div>
+        <p>SİSTEMDEKİ TOPLAM KAYIT: <strong style="color: var(--neon-green); font-size: 1.5rem;"><%= items.length %></strong></p>
+    </div>
 
-button:hover{
-  transform:scale(1.1);
-  box-shadow:0 0 30px rgba(255,0,255,.9);
-}
+    <div class="card">
+        <h2>➕ YENİ KARGO GİRİŞİ</h2>
+        <form action="/admin/create" method="POST">
+            <input type="hidden" name="secret" value="<%= secret %>">
+            <div class="form-row">
+                <div class="form-group" style="flex: 1;">
+                    <label>TAKİP NO (ID)</label>
+                    <input type="text" name="id" placeholder="Boşsa otomatik">
+                </div>
+                <div class="form-group" style="flex: 2;">
+                    <label>ALICI AD SOYAD</label>
+                    <input type="text" name="full_name" placeholder="Ad Soyad" required>
+                </div>
+                <div class="form-group" style="flex: 2;">
+                    <label>ADRES / ŞEHİR</label>
+                    <input type="text" name="address" placeholder="Ankara, Çankaya" required>
+                </div>
+                <div class="form-group">
+                    <label>TAHMİNİ TARİH</label>
+                    <input type="text" name="eta" value="<%= new Date().toISOString().split('T')[0] %>">
+                </div>
+                <div class="form-group">
+                    <button type="submit">OLUŞTUR 🚀</button>
+                </div>
+            </div>
+        </form>
+    </div>
 
-.update-btn{
-  padding:8px 16px;
-  font-size:.85rem;
-}
+    <div class="card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Kargo Bilgisi</th>
+                    <th>Durum</th>
+                    <th>Tarih</th>
+                    <th>İşlem</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% items.forEach(function(item) { %>
+                    <tr>
+                        <form action="/admin/update" method="POST">
+                            <input type="hidden" name="secret" value="<%= secret %>">
+                            <input type="hidden" name="id" value="<%= item.id %>">
+                            <td>
+                                <a href="/t/<%= item.id %>" target="_blank" class="link">#<%= item.id %></a><br>
+                                <strong style="color: #fff; font-size: 1.1em;"><%= item.full_name %></strong><br>
+                                <small style="color: #888;"><%= item.address %></small>
+                            </td>
+                            <td>
+                                <select name="status">
+                                    <option value="Hazırlandı" <%= item.status === 'Hazırlandı' ? 'selected' : '' %>>Hazırlandı</option>
+                                    <option value="Yola çıktı" <%= item.status === 'Yola çıktı' ? 'selected' : '' %>>Yola çıktı</option>
+                                    <option value="Dağıtımda" <%= item.status === 'Dağıtımda' ? 'selected' : '' %>>Dağıtımda</option>
+                                    <option value="Teslim edildi" <%= item.status === 'Teslim edildi' ? 'selected' : '' %>>Teslim edildi</option>
+                                </select>
+                            </td>
+                            <td><input type="text" name="eta" value="<%= item.eta %>" style="width: 120px; text-align: center;"></td>
+                            <td><button type="submit" class="update-btn">KAYDET</button></td>
+                        </form>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+</div>
 
-/* TABLO */
-table{
-  width:100%;
-  border-collapse:collapse;
-}
+<script>
+    // YEDEK YÜKLEME JS KODU (AYNEN KORUNDU)
+    function yedekYukle(input) {
+        if (!input.files || !input.files[0]) return;
+        
+        const file = input.files[0];
+        const reader = new FileReader();
 
-th{
-  text-align:left;
-  padding:12px;
-  font-size:.75rem;
-  letter-spacing:.5px;
-  text-transform:uppercase;
-  opacity:.7;
-}
+        reader.onload = function(e) {
+            try {
+                const jsonData = JSON.parse(e.target.result);
+                
+                if (!confirm(jsonData.length + " adet kargo kaydı yüklenecek. Onaylıyor musun?")) {
+                    input.value = ""; // İptal edilirse temizle
+                    return;
+                }
 
-td{
-  padding:14px;
-  border-top:1px solid rgba(255,255,255,.06);
-}
+                // Sunucuya gönder
+                fetch('/admin/restore', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        secret: "<%= secret %>",
+                        data: jsonData
+                    })
+                })
+                .then(res => res.json())
+                .then(response => {
+                    if (response.success) {
+                        alert("✅ Başarılı! " + response.count + " kayıt yüklendi.");
+                        location.reload();
+                    } else {
+                        alert("❌ Hata: " + response.msg);
+                    }
+                })
+                .catch(err => alert("Bağlantı hatası: " + err));
 
-tr{
-  transition:.3s;
-}
+            } catch (err) {
+                alert("❌ Dosya okunamadı! Geçersiz JSON formatı.");
+            }
+        };
 
-tr:hover{
-  background:rgba(255,255,255,.04);
-}
+        reader.readAsText(file);
+    }
+</script>
 
-.link{
-  color:#00ffe0;
-  text-decoration:none;
-  font-weight:700;
-}
-</style>
+</body>
+</html>
