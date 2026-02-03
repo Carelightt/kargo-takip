@@ -7,35 +7,33 @@
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; padding: 20px; }
         .container { max-width: 1100px; margin: 0 auto; }
-        
         .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px; }
         
-        h1, h2 { color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
-        h2 { font-size: 1.2rem; color: #1e4a9e; }
-        
-        /* Form Tasarımı */
+        /* HEADER KISMI */
+        .header-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
+        h1, h2 { color: #333; margin: 0; }
+        h2 { font-size: 1.2rem; color: #1e4a9e; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+
+        /* YEDEKLEME BUTONLARI */
+        .backup-actions { display: flex; gap: 10px; }
+        .btn-backup { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; color: white; text-decoration: none; font-size: 14px; display: inline-flex; align-items: center; }
+        .btn-download { background: #17a2b8; }
+        .btn-download:hover { background: #138496; }
+        .btn-upload { background: #6610f2; }
+        .btn-upload:hover { background: #520dc2; }
+
+        /* DİĞER TASARIMLAR */
         .form-row { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; }
         .form-group { display: flex; flex-direction: column; }
         .form-group label { font-size: 0.85rem; color: #666; margin-bottom: 5px; font-weight: bold; }
-        
-        input[type="text"], input[type="date"], select {
-            padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px;
-        }
-        
-        button {
-            padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;
-        }
-        button:hover { background: #218838; }
+        input, select { padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
         button.update-btn { background: #007bff; padding: 6px 12px; font-size: 0.9rem; }
         
-        /* Tablo Tasarımı */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background: #1e4a9e; color: white; border-radius: 5px 5px 0 0; }
-        tr:hover { background-color: #f8f9fa; }
-        
+        th { background: #1e4a9e; color: white; }
         .link { color: #007bff; text-decoration: none; font-weight: bold; }
-        .link:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -43,33 +41,43 @@
 <div class="container">
     
     <div class="card">
+        <div class="header-row">
+            <h1>📦 Kargo Yönetim Paneli</h1>
+            <div class="backup-actions">
+                <a href="/admin/backup?secret=<%= secret %>" class="btn-backup btn-download">
+                    💾 Yedeği İndir (.json)
+                </a>
+
+                <button onclick="document.getElementById('fileInput').click()" class="btn-backup btn-upload">
+                    📂 Yedek Yükle
+                </button>
+                <input type="file" id="fileInput" style="display: none;" accept=".json" onchange="yedekYukle(this)">
+            </div>
+        </div>
+        <p>Toplam Kayıt: <strong><%= items.length %></strong></p>
+    </div>
+
+    <div class="card">
         <h2>➕ Yeni Kargo Oluştur</h2>
         <form action="/admin/create" method="POST">
             <input type="hidden" name="secret" value="<%= secret %>">
-            
             <div class="form-row">
                 <div class="form-group" style="flex: 1;">
                     <label>Takip No (ID)</label>
-                    <input type="text" name="id" placeholder="Örn: 995544 (Boşsa otomatik)" >
+                    <input type="text" name="id" placeholder="Boşsa otomatik">
                 </div>
-                
-                <div class="form-row" style="flex: 2;">
-                    <div class="form-group" style="width: 100%;">
-                        <label>Alıcı Ad Soyad</label>
-                        <input type="text" name="full_name" placeholder="Ad Soyad" required>
-                    </div>
+                <div class="form-group" style="flex: 2;">
+                    <label>Alıcı Ad Soyad</label>
+                    <input type="text" name="full_name" placeholder="Ad Soyad" required>
                 </div>
-
                 <div class="form-group" style="flex: 2;">
                     <label>Adres / Şehir</label>
-                    <input type="text" name="address" placeholder="Örn: Kadıköy, İstanbul" required>
+                    <input type="text" name="address" placeholder="İstanbul, Kadıköy" required>
                 </div>
-
                 <div class="form-group">
                     <label>Tahmini Tarih</label>
-                    <input type="text" name="eta" placeholder="YYYY-AA-GG" value="<%= new Date().toISOString().split('T')[0] %>">
+                    <input type="text" name="eta" value="<%= new Date().toISOString().split('T')[0] %>">
                 </div>
-
                 <div class="form-group">
                     <button type="submit">Oluştur</button>
                 </div>
@@ -78,45 +86,36 @@
     </div>
 
     <div class="card">
-        <h1>📦 Kargo Listesi (<%= items.length %>)</h1>
         <table>
             <thead>
                 <tr>
-                    <th style="width: 25%;">Kargo Bilgisi</th>
-                    <th style="width: 20%;">Durum</th>
-                    <th style="width: 20%;">Tarih</th>
-                    <th style="width: 15%;">İşlemler</th>
+                    <th>Kargo Bilgisi</th>
+                    <th>Durum</th>
+                    <th>Tarih</th>
+                    <th>İşlem</th>
                 </tr>
             </thead>
             <tbody>
                 <% items.forEach(function(item) { %>
                     <tr>
-                        <form action="/admin/update" method="POST" style="display: contents;">
+                        <form action="/admin/update" method="POST">
                             <input type="hidden" name="secret" value="<%= secret %>">
                             <input type="hidden" name="id" value="<%= item.id %>">
-                            
                             <td>
                                 <a href="/t/<%= item.id %>" target="_blank" class="link">#<%= item.id %></a><br>
                                 <strong><%= item.full_name %></strong><br>
-                                <small style="color:#666"><%= item.address %></small>
+                                <small><%= item.address %></small>
                             </td>
-                            
                             <td>
-                                <select name="status" style="width: 100%;">
+                                <select name="status">
                                     <option value="Hazırlandı" <%= item.status === 'Hazırlandı' ? 'selected' : '' %>>Hazırlandı</option>
                                     <option value="Yola çıktı" <%= item.status === 'Yola çıktı' ? 'selected' : '' %>>Yola çıktı</option>
                                     <option value="Dağıtımda" <%= item.status === 'Dağıtımda' ? 'selected' : '' %>>Dağıtımda</option>
                                     <option value="Teslim edildi" <%= item.status === 'Teslim edildi' ? 'selected' : '' %>>Teslim edildi</option>
                                 </select>
                             </td>
-                            
-                            <td>
-                                <input type="text" name="eta" value="<%= item.eta %>" style="width: 100%;">
-                            </td>
-                            
-                            <td>
-                                <button type="submit" class="update-btn">💾 Kaydet</button>
-                            </td>
+                            <td><input type="text" name="eta" value="<%= item.eta %>" style="width: 100px;"></td>
+                            <td><button type="submit" class="update-btn">Kaydet</button></td>
                         </form>
                     </tr>
                 <% }); %>
@@ -124,6 +123,52 @@
         </table>
     </div>
 </div>
+
+<script>
+    // YEDEK YÜKLEME JS KODU
+    function yedekYukle(input) {
+        if (!input.files || !input.files[0]) return;
+        
+        const file = input.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            try {
+                const jsonData = JSON.parse(e.target.result);
+                
+                if (!confirm(jsonData.length + " adet kargo kaydı yüklenecek. Onaylıyor musun?")) {
+                    input.value = ""; // İptal edilirse temizle
+                    return;
+                }
+
+                // Sunucuya gönder
+                fetch('/admin/restore', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        secret: "<%= secret %>",
+                        data: jsonData
+                    })
+                })
+                .then(res => res.json())
+                .then(response => {
+                    if (response.success) {
+                        alert("✅ Başarılı! " + response.count + " kayıt yüklendi.");
+                        location.reload();
+                    } else {
+                        alert("❌ Hata: " + response.msg);
+                    }
+                })
+                .catch(err => alert("Bağlantı hatası: " + err));
+
+            } catch (err) {
+                alert("❌ Dosya okunamadı! Geçersiz JSON formatı.");
+            }
+        };
+
+        reader.readAsText(file);
+    }
+</script>
 
 </body>
 </html>
