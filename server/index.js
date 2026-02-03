@@ -1,4 +1,4 @@
-// server/index.js - YEDEKLEME SİSTEMİ EKLENMİŞ HALİ
+// server/index.js - YEDEKLEME + DÜZELTİLMİŞ PATH (FİNAL)
 require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 const express = require('express');
 const path = require('path');
@@ -11,20 +11,20 @@ const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 const API_TOKEN = process.env.API_TOKEN || 'change-me';
 const ADMIN_SECRET = 'f081366a24e2'; 
 
-// JSON limitini artırdık ki büyük yedekleri yüklerken patlamasın
+// JSON limitini artırdık (büyük yedekler için)
 app.use(express.json({ limit: '50mb' })); 
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Klasör Ayarları
+// --- KRİTİK DÜZELTME BURADA ---
+// views klasörü server klasörünün bir üstünde (../views)
 app.set('view engine', 'ejs');
-// views ve public klasörlerinin server'ın bir üstünde veya yanında olmasını garantiye alıyoruz
-const viewsPath = path.join(__dirname, 'views'); // Eğer server içindeyse
-app.set('views', viewsPath);
+app.set('views', path.join(__dirname, '../views'));
 
-app.use('/public', express.static(path.join(__dirname, 'public')));
-app.use(express.static(path.join(__dirname, 'public')));
+// public klasörü de bir üstte (../public)
+app.use('/public', express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, '../public')));
 
-// DB Başlatma
+// DB Başlatma (db.sqlite server klasörü içinde oluşur)
 const dbPath = path.join(__dirname, 'db.sqlite');
 const db = new Database(dbPath);
 
@@ -41,7 +41,7 @@ db.exec(`CREATE TABLE IF NOT EXISTS trackings (
     created_at TEXT DEFAULT (datetime('now'))
   )`);
 
-// --- YEDEKLEME SİSTEMİ (YENİ) ---
+// --- YEDEKLEME SİSTEMİ ---
 
 // 1. YEDEK İNDİRME
 app.get('/admin/backup', (req, res) => {
@@ -49,7 +49,6 @@ app.get('/admin/backup', (req, res) => {
     
     try {
         const rows = db.prepare('SELECT * FROM trackings').all();
-        // Dosya olarak indirt
         res.setHeader('Content-Disposition', 'attachment; filename="kargo_yedek.json"');
         res.setHeader('Content-Type', 'application/json');
         res.json(rows);
@@ -79,16 +78,20 @@ app.post('/admin/restore', (req, res) => {
     }
 });
 
-// --- DİĞER ROUTE'LAR (AYNEN DEVAM) ---
+// --- DİĞER ROUTE'LAR ---
 
 app.get('/', (req, res) => {
     res.send(`<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><title>Kargo Takip</title><style>*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}body{background:url('/public/arkaplan.jpg')no-repeat center center fixed;background-size:cover;height:100vh;display:flex;align-items:center;justify-content:center}.card{background:rgba(255,255,255,0.95);padding:40px;border-radius:15px;width:90%;max-width:450px;text-align:center;border-top:5px solid #1e4a9e;box-shadow:0 10px 25px rgba(0,0,0,0.3)}h2{color:#1e4a9e;margin-bottom:20px}input{width:100%;padding:15px;border:2px solid #ddd;border-radius:8px;margin-bottom:20px;font-size:16px}button{width:100%;padding:15px;background:#ff7f00;color:white;border:none;border-radius:8px;font-size:18px;font-weight:bold;cursor:pointer}button:hover{background:#e66900}</style></head><body><div class="card"><h2>Lütfen Kargo Takip Numaranızı Giriniz :</h2><input type="text" id="takipNo" placeholder="Takip No Giriniz..."><button onclick="git()">SORGULA</button></div><script>function git(){var val=document.getElementById("takipNo").value.trim();if(val)window.location.href="/t/"+val}document.getElementById("takipNo").addEventListener("keypress",function(e){if(e.key==="Enter")git()});</script></body></html>`);
 });
 
 app.get('/admin', (req, res) => {
-    if (req.query.secret !== ADMIN_SECRET) return res.status(403).send("Giriş Yasak");
-    const trackings = db.prepare('SELECT * FROM trackings ORDER BY created_at DESC').all();
-    res.render('admin', { items: trackings, secret: ADMIN_SECRET });
+    try {
+        if (req.query.secret !== ADMIN_SECRET) return res.status(403).send("Giriş Yasak");
+        const trackings = db.prepare('SELECT * FROM trackings ORDER BY created_at DESC').all();
+        res.render('admin', { items: trackings, secret: ADMIN_SECRET });
+    } catch (error) {
+        res.status(500).send(`<h1>Hata</h1><p>${error.message}</p>`);
+    }
 });
 
 app.post('/admin/create', (req, res) => {
@@ -120,12 +123,14 @@ app.post('/api/tracking', (req, res) => {
 });
 
 app.get('/t/:id', (req, res) => {
-    const row = db.prepare('SELECT * FROM trackings WHERE id = ?').get(req.params.id);
-    if (!row) return res.status(404).send('Takip bulunamadı');
-    const steps = ['Hazırlandı','Yola çıktı','Dağıtımda','Teslim edildi'];
-    const idx = Math.max(0, steps.indexOf(row.status));
-    const fillPercent = idx === 0 ? 12 : Math.round((idx / (steps.length - 1)) * 100);
-    res.render('tracking', { item: row, baseUrl: BASE_URL, steps, activeIndex: idx, fillPercent });
+    try {
+        const row = db.prepare('SELECT * FROM trackings WHERE id = ?').get(req.params.id);
+        if (!row) return res.status(404).send('Takip bulunamadı');
+        const steps = ['Hazırlandı','Yola çıktı','Dağıtımda','Teslim edildi'];
+        const idx = Math.max(0, steps.indexOf(row.status));
+        const fillPercent = idx === 0 ? 12 : Math.round((idx / (steps.length - 1)) * 100);
+        res.render('tracking', { item: row, baseUrl: BASE_URL, steps, activeIndex: idx, fillPercent });
+    } catch (e) { res.status(500).send(e.message); }
 });
 
 app.listen(PORT, () => console.log(`Server aktif: ${BASE_URL}`));
