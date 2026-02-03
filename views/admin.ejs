@@ -1,173 +1,293 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yönetim Paneli</title>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; padding: 20px; }
-        .container { max-width: 1100px; margin: 0 auto; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px; }
-        
-        /* HEADER KISMI */
-        .header-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
-        h1, h2 { color: #333; margin: 0; }
-        h2 { font-size: 1.2rem; color: #1e4a9e; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yönetim Paneli</title>
 
-        /* YEDEKLEME BUTONLARI */
-        .backup-actions { display: flex; gap: 10px; }
-        .btn-backup { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; color: white; text-decoration: none; font-size: 14px; display: inline-flex; align-items: center; }
-        .btn-download { background: #17a2b8; }
-        .btn-download:hover { background: #138496; }
-        .btn-upload { background: #6610f2; }
-        .btn-upload:hover { background: #520dc2; }
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
 
-        /* DİĞER TASARIMLAR */
-        .form-row { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; }
-        .form-group { display: flex; flex-direction: column; }
-        .form-group label { font-size: 0.85rem; color: #666; margin-bottom: 5px; font-weight: bold; }
-        input, select { padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
-        button { padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        button.update-btn { background: #007bff; padding: 6px 12px; font-size: 0.9rem; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background: #1e4a9e; color: white; }
-        .link { color: #007bff; text-decoration: none; font-weight: bold; }
-    </style>
+<style>
+:root{
+  --gold:#f5c77a;
+  --red:#b30000;
+  --black:#0b0b0b;
+  --glass:rgba(255,255,255,0.06);
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:'Orbitron',sans-serif;
+  background:
+    radial-gradient(circle at top,#1a0000,#000),
+    repeating-linear-gradient(45deg,rgba(255,0,0,.03),rgba(255,0,0,.03) 10px,transparent 10px,transparent 20px);
+  color:#fff;
+  padding:30px;
+  animation:bgMove 20s linear infinite;
+}
+
+@keyframes bgMove{
+  from{background-position:0 0}
+  to{background-position:400px 400px}
+}
+
+.container{
+  max-width:1200px;
+  margin:auto;
+}
+
+/* KART */
+.card{
+  background:linear-gradient(145deg,rgba(0,0,0,.85),rgba(40,0,0,.9));
+  border:1px solid rgba(255,215,150,.2);
+  border-radius:18px;
+  padding:25px;
+  margin-bottom:35px;
+  box-shadow:
+    0 0 25px rgba(255,0,0,.25),
+    inset 0 0 30px rgba(255,215,150,.08);
+  backdrop-filter:blur(10px);
+  animation:cardGlow 4s ease-in-out infinite alternate;
+}
+
+@keyframes cardGlow{
+  from{box-shadow:0 0 15px rgba(255,0,0,.3)}
+  to{box-shadow:0 0 35px rgba(255,215,150,.4)}
+}
+
+/* HEADER */
+.header-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:1px solid rgba(255,215,150,.3);
+  padding-bottom:15px;
+  margin-bottom:20px;
+}
+
+h1{
+  margin:0;
+  font-size:1.8rem;
+  color:var(--gold);
+  text-shadow:0 0 10px rgba(255,215,150,.6);
+}
+
+h2{
+  color:#ffb3b3;
+  margin-bottom:15px;
+  border-bottom:1px dashed rgba(255,0,0,.4);
+  padding-bottom:5px;
+}
+
+/* BUTONLAR */
+.backup-actions{display:flex;gap:12px}
+
+.btn-backup{
+  padding:10px 18px;
+  border-radius:30px;
+  font-weight:700;
+  border:1px solid rgba(255,215,150,.5);
+  background:linear-gradient(135deg,#300,#600);
+  color:var(--gold);
+  cursor:pointer;
+  text-decoration:none;
+  transition:.3s;
+  box-shadow:0 0 15px rgba(255,0,0,.5);
+}
+
+.btn-backup:hover{
+  transform:translateY(-2px) scale(1.05);
+  box-shadow:0 0 30px rgba(255,215,150,.9);
+}
+
+/* FORM */
+.form-row{
+  display:flex;
+  gap:15px;
+  flex-wrap:wrap;
+  align-items:flex-end;
+}
+
+.form-group{
+  display:flex;
+  flex-direction:column;
+}
+
+label{
+  font-size:.75rem;
+  color:#ffcccc;
+  margin-bottom:4px;
+}
+
+input,select{
+  background:rgba(0,0,0,.6);
+  border:1px solid rgba(255,215,150,.4);
+  color:#fff;
+  padding:10px;
+  border-radius:8px;
+  transition:.3s;
+}
+
+input:focus,select:focus{
+  outline:none;
+  box-shadow:0 0 15px rgba(255,215,150,.7);
+}
+
+button{
+  padding:10px 22px;
+  background:linear-gradient(135deg,#700,#d40000);
+  border:none;
+  border-radius:25px;
+  color:#fff;
+  font-weight:800;
+  cursor:pointer;
+  box-shadow:0 0 20px rgba(255,0,0,.7);
+  transition:.3s;
+}
+
+button:hover{
+  transform:scale(1.08);
+  box-shadow:0 0 35px rgba(255,215,150,1);
+}
+
+.update-btn{
+  padding:8px 16px;
+  font-size:.85rem;
+}
+
+/* TABLO */
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th{
+  background:linear-gradient(135deg,#400,#800);
+  color:var(--gold);
+  padding:12px;
+}
+
+td{
+  padding:14px;
+  border-bottom:1px solid rgba(255,255,255,.1);
+}
+
+tr{
+  transition:.3s;
+}
+
+tr:hover{
+  background:rgba(255,0,0,.08);
+  box-shadow:inset 0 0 15px rgba(255,215,150,.15);
+}
+
+.link{
+  color:var(--gold);
+  text-decoration:none;
+  text-shadow:0 0 8px rgba(255,215,150,.7);
+}
+</style>
 </head>
+
 <body>
 
 <div class="container">
-    
-    <div class="card">
-        <div class="header-row">
-            <h1>📦 Kargo Yönetim Paneli</h1>
-            <div class="backup-actions">
-                <a href="/admin/backup?secret=<%= secret %>" class="btn-backup btn-download">
-                    💾 Yedeği İndir (.json)
-                </a>
 
-                <button onclick="document.getElementById('fileInput').click()" class="btn-backup btn-upload">
-                    📂 Yedek Yükle
-                </button>
-                <input type="file" id="fileInput" style="display: none;" accept=".json" onchange="yedekYukle(this)">
-            </div>
-        </div>
-        <p>Toplam Kayıt: <strong><%= items.length %></strong></p>
+<div class="card">
+  <div class="header-row">
+    <h1>💎 Kargo Yönetim Paneli</h1>
+    <div class="backup-actions">
+      <a href="/admin/backup?secret=<%= secret %>" class="btn-backup">💾 Yedeği İndir</a>
+      <button onclick="document.getElementById('fileInput').click()" class="btn-backup">📂 Yedek Yükle</button>
+      <input type="file" id="fileInput" style="display:none" accept=".json" onchange="yedekYukle(this)">
     </div>
+  </div>
+  <p>Toplam Kayıt: <strong><%= items.length %></strong></p>
+</div>
 
-    <div class="card">
-        <h2>➕ Yeni Kargo Oluştur</h2>
-        <form action="/admin/create" method="POST">
-            <input type="hidden" name="secret" value="<%= secret %>">
-            <div class="form-row">
-                <div class="form-group" style="flex: 1;">
-                    <label>Takip No (ID)</label>
-                    <input type="text" name="id" placeholder="Boşsa otomatik">
-                </div>
-                <div class="form-group" style="flex: 2;">
-                    <label>Alıcı Ad Soyad</label>
-                    <input type="text" name="full_name" placeholder="Ad Soyad" required>
-                </div>
-                <div class="form-group" style="flex: 2;">
-                    <label>Adres / Şehir</label>
-                    <input type="text" name="address" placeholder="İstanbul, Kadıköy" required>
-                </div>
-                <div class="form-group">
-                    <label>Tahmini Tarih</label>
-                    <input type="text" name="eta" value="<%= new Date().toISOString().split('T')[0] %>">
-                </div>
-                <div class="form-group">
-                    <button type="submit">Oluştur</button>
-                </div>
-            </div>
-        </form>
-    </div>
+<div class="card">
+<h2>➕ Yeni Kargo Oluştur</h2>
+<form action="/admin/create" method="POST">
+<input type="hidden" name="secret" value="<%= secret %>">
+<div class="form-row">
+  <div class="form-group" style="flex:1">
+    <label>Takip No</label>
+    <input name="id">
+  </div>
+  <div class="form-group" style="flex:2">
+    <label>Alıcı</label>
+    <input name="full_name" required>
+  </div>
+  <div class="form-group" style="flex:2">
+    <label>Adres</label>
+    <input name="address" required>
+  </div>
+  <div class="form-group">
+    <label>Tarih</label>
+    <input name="eta" value="<%= new Date().toISOString().split('T')[0] %>">
+  </div>
+  <button>Oluştur</button>
+</div>
+</form>
+</div>
 
-    <div class="card">
-        <table>
-            <thead>
-                <tr>
-                    <th>Kargo Bilgisi</th>
-                    <th>Durum</th>
-                    <th>Tarih</th>
-                    <th>İşlem</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% items.forEach(function(item) { %>
-                    <tr>
-                        <form action="/admin/update" method="POST">
-                            <input type="hidden" name="secret" value="<%= secret %>">
-                            <input type="hidden" name="id" value="<%= item.id %>">
-                            <td>
-                                <a href="/t/<%= item.id %>" target="_blank" class="link">#<%= item.id %></a><br>
-                                <strong><%= item.full_name %></strong><br>
-                                <small><%= item.address %></small>
-                            </td>
-                            <td>
-                                <select name="status">
-                                    <option value="Hazırlandı" <%= item.status === 'Hazırlandı' ? 'selected' : '' %>>Hazırlandı</option>
-                                    <option value="Yola çıktı" <%= item.status === 'Yola çıktı' ? 'selected' : '' %>>Yola çıktı</option>
-                                    <option value="Dağıtımda" <%= item.status === 'Dağıtımda' ? 'selected' : '' %>>Dağıtımda</option>
-                                    <option value="Teslim edildi" <%= item.status === 'Teslim edildi' ? 'selected' : '' %>>Teslim edildi</option>
-                                </select>
-                            </td>
-                            <td><input type="text" name="eta" value="<%= item.eta %>" style="width: 100px;"></td>
-                            <td><button type="submit" class="update-btn">Kaydet</button></td>
-                        </form>
-                    </tr>
-                <% }); %>
-            </tbody>
-        </table>
-    </div>
+<div class="card">
+<table>
+<thead>
+<tr>
+<th>Kargo</th>
+<th>Durum</th>
+<th>Tarih</th>
+<th>İşlem</th>
+</tr>
+</thead>
+<tbody>
+<% items.forEach(function(item){ %>
+<tr>
+<form action="/admin/update" method="POST">
+<input type="hidden" name="secret" value="<%= secret %>">
+<input type="hidden" name="id" value="<%= item.id %>">
+<td>
+<a class="link" href="/t/<%= item.id %>" target="_blank">#<%= item.id %></a><br>
+<strong><%= item.full_name %></strong><br>
+<small><%= item.address %></small>
+</td>
+<td>
+<select name="status">
+<option <%= item.status==='Hazırlandı'?'selected':'' %>>Hazırlandı</option>
+<option <%= item.status==='Yola çıktı'?'selected':'' %>>Yola çıktı</option>
+<option <%= item.status==='Dağıtımda'?'selected':'' %>>Dağıtımda</option>
+<option <%= item.status==='Teslim edildi'?'selected':'' %>>Teslim edildi</option>
+</select>
+</td>
+<td><input name="eta" value="<%= item.eta %>" style="width:100px"></td>
+<td><button class="update-btn">Kaydet</button></td>
+</form>
+</tr>
+<% }) %>
+</tbody>
+</table>
+</div>
+
 </div>
 
 <script>
-    // YEDEK YÜKLEME JS KODU
-    function yedekYukle(input) {
-        if (!input.files || !input.files[0]) return;
-        
-        const file = input.files[0];
-        const reader = new FileReader();
-
-        reader.onload = function(e) {
-            try {
-                const jsonData = JSON.parse(e.target.result);
-                
-                if (!confirm(jsonData.length + " adet kargo kaydı yüklenecek. Onaylıyor musun?")) {
-                    input.value = ""; // İptal edilirse temizle
-                    return;
-                }
-
-                // Sunucuya gönder
-                fetch('/admin/restore', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        secret: "<%= secret %>",
-                        data: jsonData
-                    })
-                })
-                .then(res => res.json())
-                .then(response => {
-                    if (response.success) {
-                        alert("✅ Başarılı! " + response.count + " kayıt yüklendi.");
-                        location.reload();
-                    } else {
-                        alert("❌ Hata: " + response.msg);
-                    }
-                })
-                .catch(err => alert("Bağlantı hatası: " + err));
-
-            } catch (err) {
-                alert("❌ Dosya okunamadı! Geçersiz JSON formatı.");
-            }
-        };
-
-        reader.readAsText(file);
-    }
+function yedekYukle(input){
+ if(!input.files[0])return;
+ const r=new FileReader();
+ r.onload=e=>{
+  const d=JSON.parse(e.target.result);
+  if(!confirm(d.length+" kayıt yüklenecek. Emin misin?"))return;
+  fetch('/admin/restore',{
+   method:'POST',
+   headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({secret:"<%= secret %>",data:d})
+  }).then(()=>location.reload());
+ };
+ r.readAsText(input.files[0]);
+}
 </script>
 
 </body>
