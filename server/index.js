@@ -16,25 +16,29 @@ const API_TOKEN = process.env.API_TOKEN || 'change-me';
 const ADMIN_SECRET = 'f081366a24e2'; 
 
 // --- TELEGRAM AYARLARI ---
+// Senin verdiğin token ve ID
 const TELEGRAM_BOT_TOKEN = '8462814676:AAFDZ1cXE9bh4V2wyZ9r-wMoA4UY0j3czCQ';
 const TELEGRAM_CHAT_ID = '6672759317'; 
 const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: false });
 
-// JSON limitini artırdık
+// JSON limitini artırdık (büyük yedekler için)
 app.use(express.json({ limit: '50mb' })); 
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Views ve Public ayarları
+// --- KRİTİK DÜZELTME BURADA ---
+// views klasörü server klasörünün bir üstünde (../views)
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../views'));
+
+// public klasörü de bir üstte (../public)
 app.use('/public', express.static(path.join(__dirname, '../public')));
 app.use(express.static(path.join(__dirname, '../public')));
 
-// DB Başlatma
+// DB Başlatma (db.sqlite server klasörü içinde oluşur)
 const dbPath = path.join(__dirname, 'db.sqlite');
 const db = new Database(dbPath);
 
-// Tabloyu oluştur
+// Tabloyu oluştur (Rapor için 'source' sütunu eklendi)
 db.exec(`CREATE TABLE IF NOT EXISTS trackings (
     id TEXT PRIMARY KEY,
     full_name TEXT NOT NULL,
@@ -48,7 +52,7 @@ db.exec(`CREATE TABLE IF NOT EXISTS trackings (
     created_at TEXT DEFAULT (datetime('now'))
   )`);
 
-// Eskiden veritabanın varsa 'source' sütunu eksik olabilir, onu eklemeye çalışıyoruz (Hata verirse zaten vardır)
+// Eskiden veritabanın varsa 'source' sütunu eksik olabilir, onu eklemeye çalışıyoruz
 try {
     db.prepare("ALTER TABLE trackings ADD COLUMN source TEXT DEFAULT 'Bilinmiyor'").run();
 } catch (e) {
@@ -57,8 +61,10 @@ try {
 
 // --- YEDEKLEME SİSTEMİ (WEB) ---
 
+// 1. YEDEK İNDİRME
 app.get('/admin/backup', (req, res) => {
     if (req.query.secret !== ADMIN_SECRET) return res.status(403).send("Yetkisiz");
+    
     try {
         const rows = db.prepare('SELECT * FROM trackings').all();
         res.setHeader('Content-Disposition', 'attachment; filename="kargo_yedek.json"');
@@ -69,9 +75,11 @@ app.get('/admin/backup', (req, res) => {
     }
 });
 
+// 2. YEDEK YÜKLEME
 app.post('/admin/restore', (req, res) => {
     const { secret, data } = req.body;
     if (secret !== ADMIN_SECRET) return res.status(403).json({ success: false, msg: "Yetkisiz" });
+
     if (!Array.isArray(data)) return res.status(400).json({ success: false, msg: "Geçersiz veri formatı" });
 
     try {
@@ -80,7 +88,7 @@ app.post('/admin/restore', (req, res) => {
         
         const insertMany = db.transaction((kargolar) => {
             for (const kargo of kargolar) {
-                if (!kargo.source) kargo.source = 'Yedek';
+                if (!kargo.source) kargo.source = 'Yedek'; // Eski veri ise kaynak 'Yedek' olsun
                 insert.run(kargo);
             }
         });
@@ -108,7 +116,7 @@ app.get('/admin', (req, res) => {
     }
 });
 
-// Admin panelinden oluşturma (Source: Admin Paneli)
+// Admin panelinden oluşturma (Source: Admin Paneli olarak kaydedilir)
 app.post('/admin/create', (req, res) => {
     const { id, full_name, address, eta, secret } = req.body;
     if (secret !== ADMIN_SECRET) return res.status(403).send("Yetkisiz");
@@ -116,6 +124,7 @@ app.post('/admin/create', (req, res) => {
         const trackingId = id && id.trim() !== '' ? id.trim() : crypto.randomBytes(6).toString('hex');
         const insertEta = eta || new Date().toISOString().split('T')[0];
         
+        // Burayı güncelledik: source='Admin Paneli'
         db.prepare(`INSERT INTO trackings (id, full_name, address, eta, status, source) VALUES (?, ?, ?, ?, 'Hazırlandı', 'Admin Paneli')`)
           .run(trackingId, full_name, address, insertEta);
           
@@ -142,6 +151,7 @@ app.post('/api/tracking', (req, res) => {
     const insertEta = eta || new Date().toISOString().split('T')[0];
     const source = group_name || 'Genel API'; // Grup adı gelmezse 'Genel API' yazar
 
+    // Burayı güncelledik: source değişkeni eklendi
     db.prepare(`INSERT INTO trackings (id, full_name, address, eta, status, source) VALUES (?, ?, ?, ?, 'Hazırlandı', ?)`)
       .run(id, full_name, address, insertEta, source);
       
@@ -164,6 +174,7 @@ app.get('/t/:id', (req, res) => {
 // TELEGRAM OTOMATİK RAPOR VE YEDEK SİSTEMİ
 // ==========================================
 
+// Her gece 23:55'te çalışacak cron job
 cron.schedule('55 23 * * *', async () => {
     console.log('⏰ Otomatik rapor ve yedekleme zamanı...');
     
