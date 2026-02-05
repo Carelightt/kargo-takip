@@ -1,9 +1,13 @@
-// server/index.js - YEDEKLEME + DÜZELTİLMİŞ PATH (FİNAL)
+// server/index.js - FINAL SÜRÜM (YEDEK + RAPOR + GRUP TAKİBİ)
 require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 const express = require('express');
 const path = require('path');
 const crypto = require('crypto');
 const Database = require('better-sqlite3');
+
+// --- EK KÜTÜPHANELER ---
+const TelegramBot = require('node-telegram-bot-api');
+const cron = require('node-cron');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,20 +15,22 @@ const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 const API_TOKEN = process.env.API_TOKEN || 'change-me';
 const ADMIN_SECRET = 'f081366a24e2'; 
 
-// JSON limitini artırdık (büyük yedekler için)
+// --- TELEGRAM AYARLARI ---
+const TELEGRAM_BOT_TOKEN = '8462814676:AAFDZ1cXE9bh4V2wyZ9r-wMoA4UY0j3czCQ';
+const TELEGRAM_CHAT_ID = '6672759317'; 
+const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: false });
+
+// JSON limitini artırdık
 app.use(express.json({ limit: '50mb' })); 
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// --- KRİTİK DÜZELTME BURADA ---
-// views klasörü server klasörünün bir üstünde (../views)
+// Views ve Public ayarları
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../views'));
-
-// public klasörü de bir üstte (../public)
 app.use('/public', express.static(path.join(__dirname, '../public')));
 app.use(express.static(path.join(__dirname, '../public')));
 
-// DB Başlatma (db.sqlite server klasörü içinde oluşur)
+// DB Başlatma
 const dbPath = path.join(__dirname, 'db.sqlite');
 const db = new Database(dbPath);
 
@@ -37,16 +43,22 @@ db.exec(`CREATE TABLE IF NOT EXISTS trackings (
     company TEXT,
     carrier TEXT,
     status TEXT DEFAULT 'Hazırlandı',
+    source TEXT DEFAULT 'Bilinmiyor', -- Yeni Sütun: Hangi grup ekledi?
     next_auto_status_at TEXT,
     created_at TEXT DEFAULT (datetime('now'))
   )`);
 
-// --- YEDEKLEME SİSTEMİ ---
+// Eskiden veritabanın varsa 'source' sütunu eksik olabilir, onu eklemeye çalışıyoruz (Hata verirse zaten vardır)
+try {
+    db.prepare("ALTER TABLE trackings ADD COLUMN source TEXT DEFAULT 'Bilinmiyor'").run();
+} catch (e) {
+    // Sütun zaten varsa hata verir, görmezden geliyoruz.
+}
 
-// 1. YEDEK İNDİRME
+// --- YEDEKLEME SİSTEMİ (WEB) ---
+
 app.get('/admin/backup', (req, res) => {
     if (req.query.secret !== ADMIN_SECRET) return res.status(403).send("Yetkisiz");
-    
     try {
         const rows = db.prepare('SELECT * FROM trackings').all();
         res.setHeader('Content-Disposition', 'attachment; filename="kargo_yedek.json"');
@@ -57,18 +69,20 @@ app.get('/admin/backup', (req, res) => {
     }
 });
 
-// 2. YEDEK YÜKLEME
 app.post('/admin/restore', (req, res) => {
     const { secret, data } = req.body;
     if (secret !== ADMIN_SECRET) return res.status(403).json({ success: false, msg: "Yetkisiz" });
-
     if (!Array.isArray(data)) return res.status(400).json({ success: false, msg: "Geçersiz veri formatı" });
 
     try {
-        const insert = db.prepare(`INSERT OR REPLACE INTO trackings (id, full_name, address, eta, company, carrier, status, created_at) VALUES (@id, @full_name, @address, @eta, @company, @carrier, @status, @created_at)`);
+        // Eski yedeklerde 'source' olmayabilir, varsayılan değer atayalım
+        const insert = db.prepare(`INSERT OR REPLACE INTO trackings (id, full_name, address, eta, company, carrier, status, source, created_at) VALUES (@id, @full_name, @address, @eta, @company, @carrier, @status, @source, @created_at)`);
         
         const insertMany = db.transaction((kargolar) => {
-            for (const kargo of kargolar) insert.run(kargo);
+            for (const kargo of kargolar) {
+                if (!kargo.source) kargo.source = 'Yedek';
+                insert.run(kargo);
+            }
         });
 
         insertMany(data);
@@ -94,13 +108,17 @@ app.get('/admin', (req, res) => {
     }
 });
 
+// Admin panelinden oluşturma (Source: Admin Paneli)
 app.post('/admin/create', (req, res) => {
     const { id, full_name, address, eta, secret } = req.body;
     if (secret !== ADMIN_SECRET) return res.status(403).send("Yetkisiz");
     try {
         const trackingId = id && id.trim() !== '' ? id.trim() : crypto.randomBytes(6).toString('hex');
         const insertEta = eta || new Date().toISOString().split('T')[0];
-        db.prepare(`INSERT INTO trackings (id, full_name, address, eta, status) VALUES (?, ?, ?, ?, 'Hazırlandı')`).run(trackingId, full_name, address, insertEta);
+        
+        db.prepare(`INSERT INTO trackings (id, full_name, address, eta, status, source) VALUES (?, ?, ?, ?, 'Hazırlandı', 'Admin Paneli')`)
+          .run(trackingId, full_name, address, insertEta);
+          
         res.redirect('/admin?secret=' + secret);
     } catch (e) { res.send(e.message); }
 });
@@ -112,13 +130,21 @@ app.post('/admin/update', (req, res) => {
     res.redirect('/admin?secret=' + secret);
 });
 
+// API üzerinden oluşturma (Source: group_name veya API)
 app.post('/api/tracking', (req, res) => {
     const auth = req.headers['authorization'] || '';
     if (auth.replace('Bearer ', '') !== API_TOKEN) return res.status(401).json({ error: 'Unauthorized' });
-    const { full_name, address, eta } = req.body || {};
+    
+    // group_name parametresi eklendi
+    const { full_name, address, eta, group_name } = req.body || {};
+    
     const id = crypto.randomBytes(6).toString('hex');
     const insertEta = eta || new Date().toISOString().split('T')[0];
-    db.prepare(`INSERT INTO trackings (id, full_name, address, eta, status) VALUES (?, ?, ?, ?, 'Hazırlandı')`).run(id, full_name, address, insertEta);
+    const source = group_name || 'Genel API'; // Grup adı gelmezse 'Genel API' yazar
+
+    db.prepare(`INSERT INTO trackings (id, full_name, address, eta, status, source) VALUES (?, ?, ?, ?, 'Hazırlandı', ?)`)
+      .run(id, full_name, address, insertEta, source);
+      
     res.json({ id, url: `${BASE_URL}/t/${id}` });
 });
 
@@ -131,6 +157,63 @@ app.get('/t/:id', (req, res) => {
         const fillPercent = idx === 0 ? 12 : Math.round((idx / (steps.length - 1)) * 100);
         res.render('tracking', { item: row, baseUrl: BASE_URL, steps, activeIndex: idx, fillPercent });
     } catch (e) { res.status(500).send(e.message); }
+});
+
+
+// ==========================================
+// TELEGRAM OTOMATİK RAPOR VE YEDEK SİSTEMİ
+// ==========================================
+
+cron.schedule('55 23 * * *', async () => {
+    console.log('⏰ Otomatik rapor ve yedekleme zamanı...');
+    
+    try {
+        // --- 1. RAPOR OLUŞTURMA (Bugün kim kaç kargo girdi?) ---
+        // Sadece BUGÜN eklenenleri sayar
+        const bugunRaporu = db.prepare(`
+            SELECT source, COUNT(*) as adet 
+            FROM trackings 
+            WHERE date(created_at) = date('now') 
+            GROUP BY source
+        `).all();
+
+        let raporMesaji = "📊 **GÜNLÜK KARGO RAPORU** 📊\n\n";
+        
+        if (bugunRaporu.length > 0) {
+            let toplam = 0;
+            bugunRaporu.forEach(satir => {
+                raporMesaji += `🔹 ${satir.source}: ${satir.adet} adet\n`;
+                toplam += satir.adet;
+            });
+            raporMesaji += `\n--------\n📈 **Toplam: ${toplam} adet**`;
+        } else {
+            raporMesaji += "Bugün hiç kargo girişi yapılmadı.";
+        }
+
+        // Raporu gönder
+        await bot.sendMessage(TELEGRAM_CHAT_ID, raporMesaji, { parse_mode: 'Markdown' });
+
+
+        // --- 2. YEDEK ALMA (Tüm veriler) ---
+        const tumKargolar = db.prepare('SELECT * FROM trackings').all();
+
+        if (tumKargolar && tumKargolar.length > 0) {
+            const jsonIcerik = JSON.stringify(tumKargolar, null, 2);
+            const tarih = new Date().toISOString().split('T')[0];
+            const dosyaBuffer = Buffer.from(jsonIcerik);
+
+            await bot.sendDocument(TELEGRAM_CHAT_ID, dosyaBuffer, {}, {
+                filename: `kargo_yedek_${tarih}.json`,
+                contentType: 'application/json',
+                caption: '💾 Veritabanı Yedeği'
+            });
+            console.log('✅ Rapor ve Yedek gönderildi.');
+        }
+
+    } catch (error) {
+        console.error('❌ Telegram işlem hatası:', error.message);
+        bot.sendMessage(TELEGRAM_CHAT_ID, '⚠️ Sistem hatası: ' + error.message);
+    }
 });
 
 app.listen(PORT, () => console.log(`Server aktif: ${BASE_URL}`));
