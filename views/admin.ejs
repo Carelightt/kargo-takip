@@ -212,14 +212,14 @@
     
     <div class="card" style="animation: neonPulse 3s infinite;">
         <div class="header-row">
-            <h1>📦 KARGO PAVYON PANEL</h1>
+            <h1>CENGİZ ATAY KARGO PANEL</h1>
             <div class="backup-actions">
                 <a href="/admin/backup?secret=<%= secret %>" class="btn-backup btn-download">
-                    💾 İNDİR
+                    İNDİR
                 </a>
 
                 <button onclick="document.getElementById('fileInput').click()" class="btn-backup btn-upload">
-                    📂 YÜKLE
+                    YÜKLE
                 </button>
                 <input type="file" id="fileInput" style="display: none;" accept=".json" onchange="yedekYukle(this)">
             </div>
@@ -228,7 +228,7 @@
     </div>
 
     <div class="card">
-        <h2>➕ YENİ KARGO GİRİŞİ</h2>
+        <h2>KARGO EKLE</h2>
         <form action="/admin/create" method="POST">
             <input type="hidden" name="secret" value="<%= secret %>">
             <div class="form-row">
@@ -249,7 +249,7 @@
                     <input type="text" name="eta" value="<%= new Date().toISOString().split('T')[0] %>">
                 </div>
                 <div class="form-group">
-                    <button type="submit">OLUŞTUR 🚀</button>
+                    <button type="submit">OLUŞTUR</button>
                 </div>
             </div>
         </form>
@@ -342,3 +342,4 @@
 
 </body>
 </html>
+
