@@ -442,5 +442,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "d2f5fa38b4ac",
+    "full_name": "Devrim Yiğitbaş",
+    "address": "Kanuni mahallesi 860. Sokak 4/8 keçiören Ankara",
+    "eta": "17 Şubat Salı",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-10 16:37:16",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
