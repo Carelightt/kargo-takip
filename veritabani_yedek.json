@@ -370,5 +370,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Admin Paneli"
+  },
+  {
+    "id": "dfbd494781b9",
+    "full_name": "Rüveyda Dokur",
+    "address": "15 mayıs mahallesi 676 sokak no 28 Orhan apart kat 2 daire 23 DENİZLİ",
+    "eta": "2026-02-13",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-10 11:21:28",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Admin Paneli"
   }
 ]
