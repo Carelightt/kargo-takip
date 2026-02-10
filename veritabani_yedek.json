@@ -382,5 +382,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Admin Paneli"
+  },
+  {
+    "id": "f0f1030322da",
+    "full_name": "Nazar Keskin",
+    "address": "Eskişehir Odunpazarı / 71 Evler Mh. Bozlak Sk. Dostlar Sitesi Denizli Blok 6/2",
+    "eta": "14 Şubat",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-10 13:42:08",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
