@@ -430,5 +430,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "a8a4e196bf0d",
+    "full_name": "Zümra Baştürk",
+    "address": "Gaziantep / Şahinbey Beyazlar Mah. 34.Nolu Sok. Dragon Spor Kulübü",
+    "eta": "14 Şubat",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-10 15:51:36",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
