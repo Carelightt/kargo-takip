@@ -514,5 +514,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "01aef9ddc0ee",
+    "full_name": "Zeynep gökburun",
+    "address": "Emek mahallesi şemsettin günalpay caddesi aksu apt. 1/10 Odun pazarı Eskişehir",
+    "eta": "18 Şubat Çarşamba",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-11 08:33:47",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
