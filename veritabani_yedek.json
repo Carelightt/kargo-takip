@@ -562,5 +562,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "34a9c0dddedf",
+    "full_name": "Beril Su Karaca",
+    "address": "Göçmenler mahallesi 25 sk ev no 1 Toprakkale/ Osmaniye",
+    "eta": "2026-02-13",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-11 09:18:26",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Admin Paneli"
   }
 ]
