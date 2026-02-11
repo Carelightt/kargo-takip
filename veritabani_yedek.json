@@ -502,5 +502,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "f65e173b85ac",
+    "full_name": "Kübra İşbilir",
+    "address": "Pirsultan mahallesi 59233 Sokak No 40/3 Şehit Kamil Gaziantep",
+    "eta": "18 Şubat Çarşamba",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-11 08:15:22",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
