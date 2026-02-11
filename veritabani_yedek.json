@@ -778,5 +778,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "d463615b0f37",
+    "full_name": "Sümeyye Seven (Nazik Yeşilyurt)",
+    "address": "Osmaniye Kadirli şehit halis şişman mahallesi 1415 sokak no 13",
+    "eta": "16 Şubat",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-11 15:35:39",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
