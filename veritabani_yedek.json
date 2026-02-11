@@ -646,5 +646,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "eda24ab5151c",
+    "full_name": "Hacer PAPRAT",
+    "address": "Siteler Mh. 468 SK. No:4 D BLOK Daire :9 Haziran Konutları / Aliağa İzmir",
+    "eta": "16 Şubat",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-11 11:37:23",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
