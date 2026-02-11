@@ -526,5 +526,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "944be9bcae30",
+    "full_name": "Oya Başar",
+    "address": "Bağlarbaşi mah sakizağaci sok no 39 büke apt daire 1",
+    "eta": "Maltepe/ İstanbul",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-11 09:13:19",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
