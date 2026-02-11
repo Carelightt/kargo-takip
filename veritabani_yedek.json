@@ -598,5 +598,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "fe7680a2e4c5",
+    "full_name": "İlknur ölmez",
+    "address": "Vali mehmet mahallesi hacı osman caddesi no 17/2 Kestel BURSA",
+    "eta": "18 Şubat Çarşamba",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-11 10:22:10",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
