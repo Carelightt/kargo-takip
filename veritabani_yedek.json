@@ -694,5 +694,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "57f97a6962da",
+    "full_name": "Ebru Öztürk",
+    "address": "Ali baba mahallesi 63 sokak No 20/1 Giriş Daire Sivas Merkez",
+    "eta": "17 Şubat Salı",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-11 12:57:26",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
