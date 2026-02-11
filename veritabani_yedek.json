@@ -730,5 +730,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "f974d7d01e69",
+    "full_name": "Filiz küçük",
+    "address": "Bahçeli evler mahallesi akasya sokak ceyda apartmanı kapı no 12/14 daire 1 kat 1",
+    "eta": "13 şubat",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-11 13:22:17",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
