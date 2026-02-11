@@ -706,5 +706,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "6c7eddc6eef2",
+    "full_name": "Arzu AYDIN",
+    "address": "Beşikkaya MH. 2009 SK. No:1 Daire:1 / Ankara Altındağ",
+    "eta": "16 Şubat",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-11 13:17:34",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
