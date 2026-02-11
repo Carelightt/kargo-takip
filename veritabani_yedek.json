@@ -490,5 +490,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "6f6cd0599de0",
+    "full_name": "Zeynep Yılmaz",
+    "address": "Yaylapınar mahallesi büyüktaş sokak No 16 Meram Konya",
+    "eta": "18 Şubat Çarşamba",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-11 07:49:07",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
