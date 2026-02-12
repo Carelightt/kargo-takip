@@ -814,5 +814,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "41eaa98c7ac8",
+    "full_name": "Şüheda Elveren",
+    "address": "Güney Mah. Solmaz Sk. No:18 D: 2 KÖRFEZ/KOCAELİ",
+    "eta": "Dizim GRUP A.Ş",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-12 11:04:40",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
