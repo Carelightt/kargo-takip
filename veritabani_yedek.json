@@ -874,5 +874,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "992216e1a300",
+    "full_name": "Faruk Gönen",
+    "address": "3492 Sok. No : 27 Levent Mah. İzmir / Konak",
+    "eta": "Dizim GRUP A.Ş",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-12 14:21:57",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
