@@ -958,5 +958,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "9f24bb958a79",
+    "full_name": "Türkan Olgaç",
+    "address": "Aydın / İncirliova Kurtuluş Mah. 237 Sok.  No: 14/A",
+    "eta": "20 ŞUBAT",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-13 14:02:58",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
