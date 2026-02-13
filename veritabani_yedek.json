@@ -946,5 +946,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "736b6462f86e",
+    "full_name": "Pınar EREN (Şefika SARAÇOĞLU)",
+    "address": "Kuruçeşme Mh. 203/33 SK. No:14 Daire: 2 Adef 2 APARTMANI / Buca İZMİR",
+    "eta": "20 ŞUBAT",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-13 12:46:00",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
