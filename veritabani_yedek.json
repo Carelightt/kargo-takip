@@ -970,5 +970,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "eeaa9641dcc6",
+    "full_name": "Osman Duru",
+    "address": "Yeşiltepe mah. Ziya Gökalp cad. No: 55 Kat: 6 Daire 18 Kepez / Antalya",
+    "eta": "20 ŞUBAT",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-13 14:43:31",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
