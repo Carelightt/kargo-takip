@@ -1114,5 +1114,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "7657007f03af",
+    "full_name": "Seval USTA",
+    "address": "Ordu Ünye / Liseler Mh. Veteriner 1. SK. No:7/1",
+    "eta": "21 ŞUBAT",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-14 12:59:41",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
