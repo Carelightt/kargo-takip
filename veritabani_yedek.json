@@ -1126,5 +1126,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "6c9d2f563dd6",
+    "full_name": "Fatma AYDIN(Dilara hanım kızı)",
+    "address": "Kemal Paşa Mh. 7039 SK. No:51 Daire : 8 Kat: 4 / Pınarbaşı Bornova İzmir",
+    "eta": "21 ŞUBAT",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-14 14:10:32",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
