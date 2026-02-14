@@ -1030,5 +1030,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "54fc9d294ff4",
+    "full_name": "Bahar Türkmen",
+    "address": "Sağlık Mah. 170. Sk No:13 Gökkuşağı Apt. Kat/3 D:7 MANİSA/SALİHLİ",
+    "eta": "20 Şubat",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-14 07:17:36",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
