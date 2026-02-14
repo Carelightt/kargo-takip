@@ -1090,5 +1090,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "21d7b23fad6c",
+    "full_name": "Ebrar YAKAR",
+    "address": "Pir Sultan MH. 59221 Sk. NO:6 Daire: 3 / Şehitkamil Gaziantep",
+    "eta": "21 Şubat",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-14 11:56:48",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
