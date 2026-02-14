@@ -1078,5 +1078,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "152bf769d5e1",
+    "full_name": "Zeliha ŞAHİNKOÇ",
+    "address": "Turgutalp MH. Can 2 SK. No:6 (Yan Giriş) / Soma Manisa",
+    "eta": "21 Şubat",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-14 11:14:05",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
