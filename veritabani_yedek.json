@@ -1270,5 +1270,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "5fa0cc6e5e52",
+    "full_name": "Aslı Çörekçioğlu",
+    "address": "Kapuzbaşı Mh. No:133 / Yahyalı Kayseri",
+    "eta": "23 Şubat",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-16 14:00:35",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
