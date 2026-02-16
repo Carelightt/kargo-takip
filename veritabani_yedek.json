@@ -1198,5 +1198,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "acd28d31930d",
+    "full_name": "İlknur Bayraktar",
+    "address": "Çakmak Mah. Gurbet Sk. No:28 Kat:4 Daire: 10 İSTANBUL/ÜMRANİYE",
+    "eta": "21 Şubat",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-16 09:57:24",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
