@@ -1246,5 +1246,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "f050e54cb3e5",
+    "full_name": "Nazlı Atanak",
+    "address": "Mimar Sinan mah.  Parıltı sok. Gürbüz apt. No:3 Daire: 3",
+    "eta": "22 Şubat",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-16 11:08:26",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
