@@ -1438,5 +1438,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "c3f62c6dcf80",
+    "full_name": "Nurcan Aracı",
+    "address": "Diyarbakır / Kayapınar Cumhuriyet Köyü Bellek Küme Evleri No: 6",
+    "eta": "24 Şubat",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-17 16:39:34",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
