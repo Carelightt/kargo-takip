@@ -1366,5 +1366,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "1471a6ebdfa1",
+    "full_name": "Zilan Çelebi",
+    "address": "İstanbul / Kadıköy Hasanpaşa mah. Uhuvet sok. no:42  Zeren Ertaş İBB Kız Öğrenci Yurdu",
+    "eta": "24 Şubat",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-17 13:58:00",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
