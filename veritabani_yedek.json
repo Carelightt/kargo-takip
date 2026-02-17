@@ -1414,5 +1414,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "0abbf1eff7e5",
+    "full_name": "Gülay SEVİM",
+    "address": "AŞAĞI SOKU MAHALLESİ PARK SOKAK NO 14 KAT 1 DAİRE 1 MERKEZ BOLU",
+    "eta": "24 Şubat",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-17 15:47:20",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
