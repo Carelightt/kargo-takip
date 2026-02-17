@@ -1402,5 +1402,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "a933eb7d161f",
+    "full_name": "Tuğba Erikçi",
+    "address": "Necip fazıl mah. Sultan murat sok. No: 17 Daire: 8 Sultanbeyli / İstanbul",
+    "eta": "24 Şubat",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-17 15:37:40",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
