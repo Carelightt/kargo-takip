@@ -1498,5 +1498,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "c84e5473f8bd",
+    "full_name": "Arzu Kaya",
+    "address": "Esenyalı mah. Necmettin Erbakan cad. Çavuşoğlu apt. No: 77 A Blok Daire: 14 Pendik / İstanbul",
+    "eta": "24 Şubat",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-18 14:35:02",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
