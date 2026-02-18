@@ -1474,5 +1474,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "0517b39b7b6f",
+    "full_name": "Sedef İs",
+    "address": "Üniversite, 44000 İlhan Akıncı Yurdu Malatya / Battalgazi",
+    "eta": "24 Şubat",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-18 13:16:48",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
