@@ -1534,5 +1534,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "f1bad6e4823b",
+    "full_name": "Fatma Keleş",
+    "address": "Necipfazılkısakürek mah. Damla sok. No: 8 Daire: 1 İstanbul / Esenyurt",
+    "eta": "25 Şubat",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-19 12:38:22",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
