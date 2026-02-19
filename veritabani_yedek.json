@@ -1546,5 +1546,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "789faacdf998",
+    "full_name": "Nahide Genç",
+    "address": "Şırnak / Merkez Kampüs Alanı Yeni Mahalle Cezeri Kız Öğrenci Yurdu",
+    "eta": "25 Şubat",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-19 13:23:47",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
