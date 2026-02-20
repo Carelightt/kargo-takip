@@ -1630,5 +1630,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "d245aa42a9e5",
+    "full_name": "Zeliha AY",
+    "address": "Doğanlar MH. 1665 SK. No:16 Daire:4 İzmir Bornova",
+    "eta": "23 Şubat",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-20 14:10:53",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
