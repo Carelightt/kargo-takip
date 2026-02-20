@@ -1642,5 +1642,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "e3ad9dfeced1",
+    "full_name": "Gökhan Dilek",
+    "address": "Necipfazıl mah. Güney sok. 29/2 Ümraniye / İstanbul",
+    "eta": "26 Şubat",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-20 14:27:24",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
