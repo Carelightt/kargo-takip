@@ -1594,5 +1594,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "cfd1404a5401",
+    "full_name": "İrem İmren",
+    "address": "Bağbaşı mah. Şehit Necdet Yağız cad. Saliha Sultan Kız Yurdu Kırşehir / Merkez",
+    "eta": "26 Şubat",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-20 11:50:52",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
