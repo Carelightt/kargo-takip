@@ -1582,5 +1582,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "0ac90e969fbb",
+    "full_name": "İdris Akın",
+    "address": "İstanbul / Sancaktepe Merve mah. Mazi sok. No: 4 Daire: 1",
+    "eta": "26 Şubat",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-20 10:50:47",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
