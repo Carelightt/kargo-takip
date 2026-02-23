@@ -1738,5 +1738,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "7f3440b593f9",
+    "full_name": "Özlem VARLİ (Kardeşi: Elif Varli)",
+    "address": "Kars Merkez / Merkez Mh. Katmer Sk. No:25 Daire: 2 (Uğur Derindorucunun Karşısı)",
+    "eta": "2 MART",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-23 15:43:31",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
