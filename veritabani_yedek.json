@@ -1690,5 +1690,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "8518b2cb7dde",
+    "full_name": "Şengül Kaplan",
+    "address": "Salkımevler mah. 10022.sok Kyk Kız Öğrenci Yurdu Manavgat / Antalya",
+    "eta": "28 Şubat",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-23 14:01:56",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
