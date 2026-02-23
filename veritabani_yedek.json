@@ -1762,5 +1762,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "34179409fe38",
+    "full_name": "Hasret AYDIN",
+    "address": "Merkez Mh. Atatürk Cd. No:204 Kat:1 / Serik Antalya",
+    "eta": "2 Mart",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-23 16:37:52",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
