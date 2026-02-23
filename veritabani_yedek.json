@@ -1702,5 +1702,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "52bda65aa1be",
+    "full_name": "Zehra Alan (Eşi: Ersin ALAN)",
+    "address": "İstiklal Mh. Yunus Bey Sk. No:8 Kat:1 Daire:3 / Merkez Bilecik",
+    "eta": "2 MART",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-23 14:10:21",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
