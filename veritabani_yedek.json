@@ -1834,5 +1834,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "5d5a3b45def3",
+    "full_name": "Ayşe Değirmenci ( Memduh Değirmenci)",
+    "address": "Çukur Çayır Mh. Barbaros Cd. Ceylan Kent Sitesi Kat:6 Daire : 11 / Ortahisar Trabzon",
+    "eta": "2 Mart",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-24 13:41:52",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
