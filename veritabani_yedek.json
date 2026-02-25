@@ -1906,5 +1906,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "f7269853105f",
+    "full_name": "Rabia Kaya / Annesi ( Beyhan Ünal )",
+    "address": "Aşık veysel mah. Limonlu sok. 35/7 Mamak / Ankara",
+    "eta": "2026-03-02",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-25 14:31:46",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
