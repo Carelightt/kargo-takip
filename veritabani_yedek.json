@@ -1930,5 +1930,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "94c7c7ca234a",
+    "full_name": "Halime Bulut",
+    "address": "Hükümet mah. Kazandere cad. No:2 Daire: 2 Yenipazar / Aydın",
+    "eta": "2026-03-02",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-25 15:18:22",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
