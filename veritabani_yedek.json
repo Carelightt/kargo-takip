@@ -1858,5 +1858,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "bddf7134039e",
+    "full_name": "Hatice Yalçın",
+    "address": "İnönü mah. 672/35 sok. No: 10 Daire: 4 Buca / İzmir",
+    "eta": "2 Mart",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-25 10:16:59",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
