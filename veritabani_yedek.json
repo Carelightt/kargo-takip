@@ -1978,5 +1978,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "b12f87e03b64",
+    "full_name": "Nesime Nur Çelik",
+    "address": "Kuruçeşme mah. Muhtar Nurettin(Özefe) sok. 13/1 Beşiktaş / İstanbul",
+    "eta": "2026-03-03",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-26 11:44:50",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
