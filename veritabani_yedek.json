@@ -1990,5 +1990,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "6b5f579d61c3",
+    "full_name": "Gamze KARAKAYA (Annesi: :Çiğdem Karakaya)",
+    "address": "Zonguldak kdz Ereğli Elmatepe mahallesi 9 nolu bayır sokak no 24 iç kapı no 3",
+    "eta": "2026-03-05",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-26 12:40:24",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
