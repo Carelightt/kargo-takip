@@ -1966,5 +1966,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "d4e9f6cd1ab3",
+    "full_name": "Zülfiye Yüksel",
+    "address": "Gaziantep Şahinbey / Malazgirt Mh. 64 Nolu Sk. kapı no: 10",
+    "eta": "2026-03-05",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-26 11:10:56",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
