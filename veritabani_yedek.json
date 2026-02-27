@@ -2122,5 +2122,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "d5cbdf6e861c",
+    "full_name": "Selin Güneysu",
+    "address": "Düz mah. Sakalar sok. Toki Konutları C11 Kat -2 Daire: 3 Perşembe / Ordu",
+    "eta": "2026-03-04",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-27 14:41:32",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
