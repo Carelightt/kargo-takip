@@ -2146,5 +2146,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "6f79c766819f",
+    "full_name": "Çağla Genç",
+    "address": "Muğla / Menteşe Kötekli 269 Sok. Şahidi Kız Yurdu B Blok",
+    "eta": "2026-03-06",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-02-28 14:19:22",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
