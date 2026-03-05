@@ -2218,5 +2218,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "6ad5cb2fef09",
+    "full_name": "Kadriye Vuruşan",
+    "address": "Kemaliye mah. Asar 4 Çıkmazı Alaşehir / Manisa",
+    "eta": "2026-03-10",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-03-05 12:33:46",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
