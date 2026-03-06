@@ -2326,5 +2326,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "769a56ccbb16",
+    "full_name": "Turgay Tan",
+    "address": "Aydınlı mah. Toki Konutları B1-26 Blok Kat: 2 Daire: 10 Tuzla / İstanbul",
+    "eta": "2026-03-11",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-03-06 15:32:13",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
