@@ -2278,5 +2278,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "5efd78d0bebf",
+    "full_name": "Edanur Erarslan",
+    "address": "Alparslan Türkeş cad. Güzelyurt mah. No: 23/4 Sinop / Türkeli",
+    "eta": "2026-03-11",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-03-06 09:55:59",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
