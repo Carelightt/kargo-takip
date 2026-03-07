@@ -2350,5 +2350,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "4cc4f0b6e4e8",
+    "full_name": "Nisa Sevinç",
+    "address": "2148 Sok. Mehmet Akif Ersoy cad. Güzelyurt mah. Delta Deluxe rezidans A Blok Kat: 13 Kapı No: 188 Esenyurt / İstanbul",
+    "eta": "2026-03-12",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-03-07 12:23:35",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
