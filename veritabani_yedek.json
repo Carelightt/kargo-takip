@@ -2386,5 +2386,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "10c68c82b33f",
+    "full_name": "Neşe Öztürk",
+    "address": "Cumhuriyet mah. 469 Nolu sok. Yalçınlar Sitesi No: 4 Daire: 10  59785388834 Kırklareli / Babaeski",
+    "eta": "2026-03-12",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-03-07 15:16:22",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
