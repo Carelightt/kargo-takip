@@ -2434,5 +2434,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "b71103d77902",
+    "full_name": "Selin Demir",
+    "address": "Kökenli mah. Kaşaltı Göçeli sok. No: 43 Ordu / Altınordu",
+    "eta": "2026-03-14",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-03-09 10:25:34",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
