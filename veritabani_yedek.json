@@ -2470,5 +2470,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "30afaf9a73d0",
+    "full_name": "Ceylan Çingi",
+    "address": "Nene Hatun mah. Anıl sok. Ediş Yapı Yurttaş Konakları No: 1 A Blok Daire: 7 Kocaeli / Darıca",
+    "eta": "2026-03-15",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-03-10 12:53:09",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
