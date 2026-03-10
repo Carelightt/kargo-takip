@@ -2494,5 +2494,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "dff1d8d73d3f",
+    "full_name": "Nurda Oruç",
+    "address": "Erzincan / Merkez Sivas Yolu Üzeri Yalnız Bağ mah. Mengücek Gazi Kız Yurdu",
+    "eta": "2026-03-15",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-03-10 16:21:56",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
