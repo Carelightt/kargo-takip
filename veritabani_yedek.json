@@ -2590,5 +2590,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "b35941f206d5",
+    "full_name": "Özge Salman",
+    "address": "Kirazlı Mah. 1205 Sok. No:14 Daire: 4 Bağcılar / İstanbul",
+    "eta": "2026-03-17",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-03-14 16:03:39",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
