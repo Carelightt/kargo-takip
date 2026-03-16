@@ -2638,5 +2638,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "e6b3e2281b9d",
+    "full_name": "Kardelen Yavuz",
+    "address": "Kızılay mah. Divanoğlu sok. No:5 Ortaköy / Aksaray",
+    "eta": "2026-03-20",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-03-16 14:42:19",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
