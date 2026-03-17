@@ -2674,5 +2674,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "1c2def75ef14",
+    "full_name": "Medine Gülalan",
+    "address": "Esmerçayır mah. 30. sok No: 27 Şanlıurfa / Siverek",
+    "eta": "2026-03-21",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-03-17 15:56:44",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
