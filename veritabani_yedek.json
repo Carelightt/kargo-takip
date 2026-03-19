@@ -2710,5 +2710,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "fe200a01ea7c",
+    "full_name": "Emine Hatun Köklükaya",
+    "address": "KÜÇÜKHACILAR KÖYÜ KÜÇÜKHACILAR KÜME EVLERİ NO: 340 İÇ KAPI NO: 1 MERKEZ / ISPARTA",
+    "eta": "2026-03-23",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-03-19 12:08:21",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
