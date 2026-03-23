@@ -2806,5 +2806,17 @@
     "carrier": null,
     "next_auto_status_at": null,
     "source": "Genel API"
+  },
+  {
+    "id": "9d83c1386cf6",
+    "full_name": "Esma Nur Yılmaz",
+    "address": "Giresun / Yenimahalle 1 sok. Denizyıldızı Sitesi Bina no : 42 Daire: 17 Kat: 5",
+    "eta": "2026-03-27",
+    "company": null,
+    "status": "Hazırlandı",
+    "created_at": "2026-03-23 12:52:41",
+    "carrier": null,
+    "next_auto_status_at": null,
+    "source": "Genel API"
   }
 ]
